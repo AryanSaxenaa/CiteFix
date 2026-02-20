@@ -94,7 +94,9 @@ export default function Home() {
                 <Zap className="w-4 h-4" /> Run Analysis — Free
               </a>
               <a
-                href="#demo"
+                href="https://youtu.be/cvYL8Rugeb4?si=54DSIMCTpCU-nSqJ"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group px-8 py-4 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2"
               >
                 <span>View Live Demo</span>
@@ -529,7 +531,9 @@ export default function Home() {
               Live Demo
             </a>
             <a
-              href="#"
+              href="https://github.com/AryanSaxenaa/Scoutlytics/blob/main/README.md"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
               Documentation
