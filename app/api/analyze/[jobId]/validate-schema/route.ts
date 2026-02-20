@@ -95,15 +95,29 @@ function validateSchema(jsonLdString: string): SchemaValidationResult {
   let parsed: Record<string, unknown> | Record<string, unknown>[];
   try {
     parsed = JSON.parse(jsonLdString);
-  } catch (e) {
-    return {
-      isValid: false,
-      errors: [{ path: "root", message: `Invalid JSON: ${String(e)}`, severity: "error" }],
-      warnings: [],
-      score: 0,
-      types: [],
-      recommendations: ["Fix the JSON syntax errors before proceeding."],
-    };
+    // Handle double-encoded strings
+    if (typeof parsed === "string") {
+      parsed = JSON.parse(parsed);
+    }
+  } catch {
+    // Try unescaping common escape sequences from LLM output
+    try {
+      const unescaped = jsonLdString
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, "\t")
+        .replace(/\\\\/g, "\\")
+        .replace(/\\"/g, '"');
+      parsed = JSON.parse(unescaped);
+    } catch (e2) {
+      return {
+        isValid: false,
+        errors: [{ path: "root", message: `Invalid JSON: ${String(e2)}`, severity: "error" }],
+        warnings: [],
+        score: 0,
+        types: [],
+        recommendations: ["Fix the JSON syntax errors before proceeding."],
+      };
+    }
   }
 
   // Normalize to array

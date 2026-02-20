@@ -105,10 +105,32 @@ export default function ResultsPage() {
   const scoreColor = score < 40 ? "text-red-400" : score < 70 ? "text-yellow-400" : "text-green-400";
   const scoreBg = score < 40 ? "bg-red-500/10" : score < 70 ? "bg-yellow-500/10" : "bg-green-500/10";
 
+  // Clean escaped JSON-LD for display and copy
+  const cleanJsonLd = (raw: string): string => {
+    try {
+      const parsed = JSON.parse(raw);
+      const obj = typeof parsed === "string" ? JSON.parse(parsed) : parsed;
+      return JSON.stringify(obj, null, 2);
+    } catch {
+      try {
+        const unescaped = raw
+          .replace(/\\n/g, "\n")
+          .replace(/\\t/g, "\t")
+          .replace(/\\\\/g, "\\")
+          .replace(/\\"/g, '"');
+        const parsed = JSON.parse(unescaped);
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return raw;
+      }
+    }
+  };
+
   const copySchema = () => {
     if (assets?.schemaMarkup?.jsonLd) {
+      const clean = cleanJsonLd(assets.schemaMarkup.jsonLd);
       navigator.clipboard.writeText(
-        `<script type="application/ld+json">\n${assets.schemaMarkup.jsonLd}\n</script>`
+        `<script type="application/ld+json">\n${clean}\n</script>`
       );
       setCopiedSchema(true);
       setTimeout(() => setCopiedSchema(false), 2000);
@@ -153,7 +175,7 @@ export default function ResultsPage() {
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
         <div className="bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-full pl-6 pr-2 py-2 flex items-center gap-8 shadow-2xl shadow-black/50">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="Scoutlytics" className="w-10 h-10 object-contain" />
+            <img src="/logo.png" alt="Scoutlytics" className="w-14 h-14 object-contain" />
             <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link href="/analyze" className="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">
@@ -434,7 +456,7 @@ export default function ResultsPage() {
                         </button>
                       </div>
                       <pre className="bg-[#1a1a1a] p-3 rounded-lg text-xs text-green-300 font-mono overflow-x-auto max-h-[400px] overflow-y-auto">
-                        {assets.schemaMarkup.jsonLd}
+                        {cleanJsonLd(assets.schemaMarkup.jsonLd)}
                       </pre>
                       {assets.schemaMarkup.isValid && (
                         <div className="mt-2 text-xs text-green-400 flex items-center gap-1">

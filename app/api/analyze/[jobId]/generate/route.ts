@@ -236,16 +236,46 @@ Focus on topically relevant internal pages that would strengthen the content's a
 function extractCodeBlock(text: string): string {
   // Extract JSON from markdown code blocks
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) return jsonMatch[1].trim();
-
-  // Try to find raw JSON
-  const jsonStart = text.indexOf("{");
-  const jsonEnd = text.lastIndexOf("}");
-  if (jsonStart !== -1 && jsonEnd !== -1) {
-    return text.slice(jsonStart, jsonEnd + 1);
+  let raw = "";
+  if (jsonMatch) {
+    raw = jsonMatch[1].trim();
+  } else {
+    // Try to find raw JSON
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}");
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      raw = text.slice(jsonStart, jsonEnd + 1);
+    } else {
+      raw = text;
+    }
   }
 
-  return text;
+  // Clean up: the agent sometimes returns a JS string literal with escape sequences.
+  // Try to parse it; if that works, re-stringify cleanly so we store valid JSON.
+  try {
+    const parsed = JSON.parse(raw);
+    // If parsed is a string (double-encoded), parse that too
+    if (typeof parsed === "string") {
+      const inner = JSON.parse(parsed);
+      return JSON.stringify(inner, null, 2);
+    }
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    // If it contains literal \n and \" escape sequences that weren't parsed,
+    // attempt to unescape them manually and re-parse
+    try {
+      const unescaped = raw
+        .replace(/\\n/g, "\n")
+        .replace(/\\t/g, "\t")
+        .replace(/\\\\/g, "\\")
+        .replace(/\\"/g, '"');
+      const parsed = JSON.parse(unescaped);
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      // Return as-is if nothing works
+      return raw;
+    }
+  }
 }
 
 function faqToHtml(faqText: string): string {
