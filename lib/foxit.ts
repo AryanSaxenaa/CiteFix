@@ -14,6 +14,7 @@ function authHeaders(): Record<string, string> {
   return {
     client_id: clientId,
     client_secret: clientSecret,
+    Authorization: "Basic Og==",
   };
 }
 
@@ -46,24 +47,39 @@ export async function uploadDocument(
 
 // Convert HTML to PDF
 export async function htmlToPdf(documentId: string): Promise<string> {
-  const res = await fetch(
+  // Try PDF creation endpoint (HTML → PDF is classified as "PDF Creation" in Foxit docs)
+  const endpoints = [
+    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/to/pdf`,
+    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/create-pdf`,
     `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/convert/pdf`,
-    {
+  ];
+
+  let lastError = "";
+  for (const endpoint of endpoints) {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         ...authHeaders(),
         "Content-Type": "application/json",
       },
-    }
-  );
+    });
 
-  if (!res.ok) {
+    if (res.ok) {
+      const data = await res.json();
+      return data.taskId;
+    }
+
     const text = await res.text();
-    throw new Error(`Foxit HTML→PDF conversion failed: ${text}`);
+    lastError = `${endpoint} → ${res.status}: ${text}`;
+    console.error(`[Foxit] Endpoint failed: ${lastError}`);
+
+    // 404 means wrong endpoint, try next; other errors are real failures
+    if (res.status !== 404) {
+      throw new Error(`Foxit HTML→PDF conversion failed (${res.status}): ${text}`);
+    }
   }
 
-  const data = await res.json();
-  return data.taskId;
+  throw new Error(`Foxit HTML→PDF: no working endpoint found. Last: ${lastError}`);
 }
 
 // Check task status (polling)

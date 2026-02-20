@@ -132,28 +132,32 @@ function identifyGaps(
   const gaps: GapItem[] = [];
   const total = citedPages.length || 1;
 
-  // Schema gap
+  // Schema gap — always flag if user has no schema (AEO best practice)
   const pagesWithSchema = citedPages.filter((p) => p.schemaMarkup.length > 0).length;
   const schemaRate = pagesWithSchema / total;
-  if (domain.existingSchemaTypes.length === 0 && schemaRate > 0.3) {
+  if (domain.existingSchemaTypes.length === 0) {
     gaps.push({
       name: "Missing JSON-LD Schema Markup",
-      description: `${Math.round(schemaRate * 100)}% of top-cited pages have JSON-LD schema markup. Your page has none.`,
-      impactScore: 0.35 + schemaRate * 0.15,
+      description: schemaRate > 0
+        ? `${Math.round(schemaRate * 100)}% of top-cited pages have JSON-LD schema markup. Your page has none.`
+        : "Your page has no JSON-LD schema markup. Adding structured data is one of the highest-impact AEO improvements.",
+      impactScore: 0.4,
       difficulty: "easy",
       assetGenerated: true,
       category: "schema",
     });
   }
 
-  // FAQ gap
+  // FAQ gap — always flag if user has no FAQ (AI engines strongly favor Q&A content)
   const pagesWithFaq = citedPages.filter((p) => p.faqSections.length >= 2).length;
   const faqRate = pagesWithFaq / total;
-  if (!domain.hasFaq && faqRate > 0.3) {
+  if (!domain.hasFaq) {
     gaps.push({
       name: "Missing FAQ Section",
-      description: `${Math.round(faqRate * 100)}% of competitors have FAQ sections. AI engines strongly prefer pages with direct Q&A content.`,
-      impactScore: 0.3 + faqRate * 0.15,
+      description: faqRate > 0
+        ? `${Math.round(faqRate * 100)}% of competitors have FAQ sections. AI engines strongly prefer pages with direct Q&A content.`
+        : "Your page has no FAQ section. AI engines strongly favor pages with direct question-and-answer content for citations.",
+      impactScore: 0.35,
       difficulty: "easy",
       assetGenerated: true,
       category: "faq",
@@ -163,7 +167,7 @@ function identifyGaps(
   // Heading hierarchy gap
   const avgCitedHeadings = citedPages.reduce((s, p) => s + p.headings.length, 0) / total;
   const userHeadings = domain.page.headings.length;
-  if (userHeadings < avgCitedHeadings * 0.5) {
+  if (userHeadings < avgCitedHeadings * 0.5 || userHeadings < 5) {
     gaps.push({
       name: "Weak Heading Hierarchy",
       description: `Top-cited pages average ${Math.round(avgCitedHeadings)} headings. Your page has ${userHeadings}. AI engines use headings to understand content structure.`,
@@ -176,10 +180,12 @@ function identifyGaps(
 
   // Content depth gap
   const avgCitedWords = citedPages.reduce((s, p) => s + p.wordCount, 0) / total;
-  if (domain.page.wordCount < avgCitedWords * 0.5) {
+  if (domain.page.wordCount < avgCitedWords * 0.5 || domain.contentDepth < 50) {
     gaps.push({
       name: "Insufficient Content Depth",
-      description: `Top-cited pages average ${Math.round(avgCitedWords)} words. Your page has ${domain.page.wordCount}. Deeper content correlates with higher citation probability.`,
+      description: avgCitedWords > 0
+        ? `Top-cited pages average ${Math.round(avgCitedWords)} words. Your page has ${domain.page.wordCount}. Deeper content correlates with higher citation probability.`
+        : `Your page has ${domain.page.wordCount} words. Richer, more comprehensive content correlates with higher AI citation probability.`,
       impactScore: 0.32,
       difficulty: "hard",
       assetGenerated: true,
@@ -187,7 +193,7 @@ function identifyGaps(
     });
   }
 
-  // Specific schema types
+  // Specific schema types from cited pages
   const schemaTypeCounts: Record<string, number> = {};
   for (const page of citedPages) {
     for (const schema of page.schemaMarkup) {

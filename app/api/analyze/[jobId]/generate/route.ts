@@ -35,8 +35,8 @@ export async function POST(
       (g) => g.category === "content" || g.category === "headings"
     );
 
-    // Generate JSON-LD schema using You.com Agent
-    if (hasSchemaGap) {
+    // Always generate schema if missing — it's the highest-impact AEO fix
+    if (hasSchemaGap || job.domainAnalysis.existingSchemaTypes.length === 0) {
       const schemaPrompt = `Generate valid JSON-LD schema markup for a webpage about "${job.topic}" on the domain "${job.domain}". 
 Include the following schema types as appropriate: Article, FAQPage, BreadcrumbList, WebPage.
 Use realistic data based on the topic. Return ONLY the JSON-LD code block, no explanation.
@@ -61,8 +61,8 @@ The schema should be ready to paste into a <script type="application/ld+json"> t
       };
     }
 
-    // Generate FAQ content section
-    if (hasFaqGap) {
+    // Generate FAQ content section — always generate if user has no FAQ
+    if (hasFaqGap || !job.domainAnalysis.hasFaq) {
       const faqPrompt = `Generate 10 high-quality FAQ questions and answers about "${job.topic}" for the website ${job.domain}.
 Format as a clean FAQ section. Each question should be on its own line starting with "Q: " and each answer starting with "A: ".
 The answers should be comprehensive, authoritative, and written in a professional tone.
@@ -78,8 +78,8 @@ Make the questions reflect what real users would ask AI search engines about thi
       assets.contentSections = [faqSection];
     }
 
-    // Generate rewritten page copy
-    if (hasContentGap) {
+    // Generate rewritten page copy — generate if content/heading gap or low content depth
+    if (hasContentGap || job.domainAnalysis.contentDepth < 60) {
       const bestArchetype = job.patternResults.archetypes[0];
       const copyPrompt = `Rewrite the following page content for the topic "${job.topic}" on ${job.domain}.
 The rewrite should match this citation archetype: "${bestArchetype?.name || "Authority Hub with Schema"}".

@@ -55,6 +55,7 @@ export async function POST(
     return NextResponse.json({ success: true, pdfUrl });
   } catch (error) {
     const message = error instanceof Error ? error.message : "PDF generation failed";
+    console.error(`[PDF] Foxit PDF generation failed for job ${jobId}:`, message);
     // Still mark as complete — PDF is a bonus, results are the core value
     updateJob(jobId, {
       stage: 5,
