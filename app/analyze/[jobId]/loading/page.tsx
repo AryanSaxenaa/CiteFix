@@ -160,7 +160,7 @@ export default function LoadingPage() {
               <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
               <Sparkles className="relative text-white w-3 h-3" />
             </div>
-            <span className="font-serif font-bold text-lg tracking-tight">CiteFix</span>
+            <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
         </div>
       </nav>

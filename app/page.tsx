@@ -38,7 +38,7 @@ export default function Home() {
               <Sparkles className="relative text-white w-3 h-3" />
             </div>
             <span className="font-serif font-bold text-lg tracking-tight">
-              CiteFix
+              Scoutlytics
             </span>
           </div>
 
@@ -398,7 +398,7 @@ export default function Home() {
 
                 <h3 className="text-xl font-medium mb-8 flex items-center gap-3 text-white">
                   <Sparkles className="w-5 h-5 text-[#E74C3C]" />
-                  CiteFix Engine
+                  Scoutlytics Engine
                 </h3>
 
                 <div className="space-y-4">
@@ -451,7 +451,7 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
               </div>
               <div className="text-xs text-gray-500 font-mono">
-                citefix-cli — v2.1.0
+                scoutlytics-cli — v2.1.0
               </div>
               <div className="w-10"></div>
             </div>
@@ -546,7 +546,7 @@ export default function Home() {
                 <Sparkles className="text-white w-3 h-3" />
               </div>
               <span className="text-xl font-serif font-bold text-white">
-                CiteFix
+                Scoutlytics
               </span>
             </div>
             <p className="text-gray-500 text-sm max-w-sm">
@@ -641,7 +641,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 text-xs text-gray-600">
-          <div>© 2024 CiteFix Inc. All rights reserved.</div>
+          <div>© 2024 Scoutlytics. All rights reserved.</div>
           <div className="flex gap-8">
             <a href="#" className="hover:text-white transition-colors">
               Privacy Policy

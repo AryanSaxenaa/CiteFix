@@ -25,7 +25,7 @@ export async function GET(
         return new NextResponse(new Uint8Array(briefData.buffer), {
           headers: {
             "Content-Type": "application/pdf",
-            "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.pdf"`,
+            "Content-Disposition": `attachment; filename="Scoutlytics-Brief-${hostname}.pdf"`,
           },
         });
       }
@@ -34,7 +34,7 @@ export async function GET(
         return new NextResponse(new Uint8Array(briefData.buffer), {
           headers: {
             "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.docx"`,
+            "Content-Disposition": `attachment; filename="Scoutlytics-Brief-${hostname}.docx"`,
           },
         });
       }
@@ -48,7 +48,7 @@ export async function GET(
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html",
-      "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.html"`,
+      "Content-Disposition": `attachment; filename="Scoutlytics-Brief-${hostname}.html"`,
     },
   });
 }

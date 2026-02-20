@@ -117,7 +117,7 @@ export default function ResultsPage() {
               <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
               <Sparkles className="relative text-white w-3 h-3" />
             </div>
-            <span className="font-serif font-bold text-lg tracking-tight">CiteFix</span>
+            <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link href="/analyze" className="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">
             New Analysis

@@ -15,7 +15,7 @@ export async function GET(
   const exportData = {
     _meta: {
       exportedAt: new Date().toISOString(),
-      generator: "CiteFix",
+      generator: "Scoutlytics",
       version: "1.0",
       jobId,
     },
@@ -52,7 +52,7 @@ export async function GET(
     status: 200,
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="citefix-export-${hostname}.json"`,
+      "Content-Disposition": `attachment; filename="scoutlytics-export-${hostname}.json"`,
     },
   });
 }

@@ -280,7 +280,7 @@ export async function generatePdfFromHtml(
   }
 
   // Step 5: Download
-  return downloadDocument(finalDocId, `CiteFix-Brief-${brandName}.pdf`);
+  return downloadDocument(finalDocId, `Scoutlytics-Brief-${brandName}.pdf`);
 }
 
 // Document Generation API — template-based document creation

@@ -59,7 +59,7 @@ export default function BriefPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `citefix-brief-${data?.domain || "report"}.${ext}`;
+      a.download = `scoutlytics-brief-${data?.domain || "report"}.${ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -165,7 +165,7 @@ export default function BriefPage() {
               <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
               <Sparkles className="relative text-white w-3 h-3" />
             </div>
-            <span className="font-serif font-bold text-lg tracking-tight">CiteFix</span>
+            <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link
             href={`/analyze/${jobId}/results`}

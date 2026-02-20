@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CiteFix - Automated Answer Engine Optimization",
+  title: "Scoutlytics - Automated Answer Engine Optimization",
   description: "The standard for Answer Engine Optimization. Helping brands secure their citations in the age of AI search.",
 };
 

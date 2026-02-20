@@ -223,7 +223,7 @@ export default function AnalyzePage() {
               <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
               <Sparkles className="relative text-white w-3 h-3" />
             </div>
-            <span className="font-serif font-bold text-lg tracking-tight">CiteFix</span>
+            <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link
             href="/"
@@ -512,7 +512,7 @@ export default function AnalyzePage() {
           </button>
 
           <p className="text-xs text-gray-600 text-center">
-            Analysis takes {depthInfo[depth].time}. CiteFix reads publicly available web
+            Analysis takes {depthInfo[depth].time}. Scoutlytics reads publicly available web
             data only.
           </p>
         </div>

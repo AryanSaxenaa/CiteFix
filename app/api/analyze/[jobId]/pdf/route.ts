@@ -81,7 +81,7 @@ export async function POST(
         const uploadedId = await uploadDocument(pdfBuffer, "docgen-brief.pdf");
         const compressTaskId = await compressPdf(uploadedId);
         const compressedDocId = await waitForTask(compressTaskId);
-        finalBuffer = await downloadDocument(compressedDocId, `CiteFix-Brief-${hostname}.pdf`);
+        finalBuffer = await downloadDocument(compressedDocId, `Scoutlytics-Brief-${hostname}.pdf`);
         console.log(`[PDF] DocGen PDF compressed: ${pdfBuffer.length} → ${finalBuffer.length} bytes`);
       } catch {
         console.log(`[PDF] DocGen PDF compression skipped (non-critical)`);
