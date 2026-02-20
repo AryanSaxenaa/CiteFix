@@ -254,7 +254,7 @@ export async function compressPdf(documentId: string): Promise<string> {
   return data.taskId;
 }
 
-// Full pipeline: HTML → upload → convert → watermark → compress → download
+// Full pipeline: HTML → upload → convert → download
 export async function generatePdfFromHtml(
   htmlContent: string,
   brandName: string
@@ -267,25 +267,8 @@ export async function generatePdfFromHtml(
   const convertTaskId = await htmlToPdf(uploadedId);
   const pdfDocId = await waitForTask(convertTaskId);
 
-  // Step 3: Add watermark
-  let finalDocId = pdfDocId;
-  try {
-    const watermarkTaskId = await addWatermark(pdfDocId, `${brandName} — Confidential`);
-    finalDocId = await waitForTask(watermarkTaskId);
-  } catch {
-    // Watermark is non-critical, continue with unwatermarked PDF
-  }
-
-  // Step 4: Compress
-  try {
-    const compressTaskId = await compressPdf(finalDocId);
-    finalDocId = await waitForTask(compressTaskId);
-  } catch {
-    // Compression is non-critical
-  }
-
-  // Step 5: Download
-  return downloadDocument(finalDocId, `Scoutlytics-Brief-${brandName}.pdf`);
+  // Step 3: Download
+  return downloadDocument(pdfDocId, `Scoutlytics-Brief-${brandName}.pdf`);
 }
 
 // Document Generation API — template-based document creation
