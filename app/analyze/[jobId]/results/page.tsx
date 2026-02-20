@@ -175,7 +175,7 @@ export default function ResultsPage() {
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
         <div className="bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-full pl-6 pr-2 py-2 flex items-center gap-8 shadow-2xl shadow-black/50">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.png" alt="Scoutlytics" className="w-[90px] h-[90px] object-contain" />
+            <img src="/logo.png" alt="Scoutlytics" className="w-[100px] h-[100px] object-contain" />
             <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link href="/analyze" className="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">

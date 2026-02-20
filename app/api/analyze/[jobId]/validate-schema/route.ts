@@ -120,30 +120,63 @@ function validateSchema(jsonLdString: string): SchemaValidationResult {
     }
   }
 
-  // Normalize to array
-  const schemas = Array.isArray(parsed) ? parsed : [parsed];
+  // Normalize to array — handle @graph structures
+  let schemas: Record<string, unknown>[];
+  let isGraph = false;
+  if (Array.isArray(parsed)) {
+    schemas = parsed;
+  } else {
+    const obj = parsed as Record<string, unknown>;
+    if (Array.isArray(obj["@graph"])) {
+      isGraph = true;
+      // @graph schema: validate @context at top level, then each graph item
+      if (!obj["@context"]) {
+        errors.push({
+          path: "@context",
+          message: "Missing @context — required for valid JSON-LD",
+          severity: "error",
+        });
+        score -= 20;
+      } else {
+        const ctx = String(obj["@context"]);
+        if (!ctx.includes("schema.org")) {
+          warnings.push({
+            property: "@context",
+            message: `@context is "${ctx}" — expected "https://schema.org"`,
+            suggestion: 'Use "https://schema.org" as the @context value',
+          });
+          score -= 5;
+        }
+      }
+      schemas = obj["@graph"] as Record<string, unknown>[];
+    } else {
+      schemas = [obj];
+    }
+  }
 
   for (let i = 0; i < schemas.length; i++) {
     const schema = schemas[i] as Record<string, unknown>;
-    const prefix = schemas.length > 1 ? `[${i}]` : "";
+    const prefix = schemas.length > 1 ? `@graph[${i}].` : "";
 
-    // Step 2: Check @context
-    if (!schema["@context"]) {
-      errors.push({
-        path: `${prefix}@context`,
-        message: "Missing @context — required for valid JSON-LD",
-        severity: "error",
-      });
-      score -= 20;
-    } else {
-      const ctx = String(schema["@context"]);
-      if (!ctx.includes("schema.org")) {
-        warnings.push({
-          property: `${prefix}@context`,
-          message: `@context is "${ctx}" — expected "https://schema.org"`,
-          suggestion: 'Use "https://schema.org" as the @context value',
+    // Step 2: Check @context (skip for @graph items — they inherit from parent)
+    if (!isGraph) {
+      if (!schema["@context"]) {
+        errors.push({
+          path: `${prefix}@context`,
+          message: "Missing @context — required for valid JSON-LD",
+          severity: "error",
         });
-        score -= 5;
+        score -= 20;
+      } else {
+        const ctx = String(schema["@context"]);
+        if (!ctx.includes("schema.org")) {
+          warnings.push({
+            property: `${prefix}@context`,
+            message: `@context is "${ctx}" — expected "https://schema.org"`,
+            suggestion: 'Use "https://schema.org" as the @context value',
+          });
+          score -= 5;
+        }
       }
     }
 
