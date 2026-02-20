@@ -36,6 +36,16 @@ export default function ResultsPage() {
   const [copiedSchema, setCopiedSchema] = useState(false);
   const [expandedCitation, setExpandedCitation] = useState<number | null>(null);
   const [showApiDetails, setShowApiDetails] = useState(false);
+  const [schemaValidation, setSchemaValidation] = useState<{
+    isValid: boolean;
+    errors: { path: string; message: string; severity: string }[];
+    warnings: { property: string; message: string; suggestion: string }[];
+    score: number;
+    types: string[];
+    recommendations: string[];
+  } | null>(null);
+  const [validatingSchema, setValidatingSchema] = useState(false);
+  const [showBeforeAfter, setShowBeforeAfter] = useState(false);
 
   useEffect(() => {
     async function fetchResults() {
@@ -102,6 +112,36 @@ export default function ResultsPage() {
       );
       setCopiedSchema(true);
       setTimeout(() => setCopiedSchema(false), 2000);
+    }
+  };
+
+  const runSchemaValidation = async () => {
+    setValidatingSchema(true);
+    try {
+      const res = await fetch(`/api/analyze/${jobId}/validate-schema`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setSchemaValidation(result.validation);
+      }
+    } catch { /* ignore */ }
+    setValidatingSchema(false);
+  };
+
+  // Freshness helper: returns { label, color } for a given date
+  const getFreshness = (dateStr?: string): { label: string; color: string; bgColor: string } => {
+    if (!dateStr) return { label: "Unknown", color: "text-gray-600", bgColor: "bg-gray-500/10" };
+    try {
+      const date = new Date(dateStr);
+      const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (days < 7) return { label: `${days}d ago`, color: "text-green-400", bgColor: "bg-green-500/10" };
+      if (days < 30) return { label: `${Math.floor(days / 7)}w ago`, color: "text-green-400", bgColor: "bg-green-500/10" };
+      if (days < 90) return { label: `${Math.floor(days / 30)}mo ago`, color: "text-yellow-400", bgColor: "bg-yellow-500/10" };
+      if (days < 365) return { label: `${Math.floor(days / 30)}mo ago`, color: "text-orange-400", bgColor: "bg-orange-500/10" };
+      return { label: `${Math.floor(days / 365)}y ago`, color: "text-red-400", bgColor: "bg-red-500/10" };
+    } catch {
+      return { label: "Unknown", color: "text-gray-600", bgColor: "bg-gray-500/10" };
     }
   };
 
@@ -223,6 +263,16 @@ export default function ResultsPage() {
                   {expandedCitation === i && (
                     <div className="px-4 pb-3 text-xs space-y-1 border-b border-white/5">
                       <div className="text-gray-500">{url.description}</div>
+                      {/* Freshness Indicator */}
+                      {(() => {
+                        const fresh = getFreshness(url.publishedDate);
+                        return (
+                          <div className={`inline-flex items-center gap-1 ${fresh.bgColor} ${fresh.color} px-2 py-0.5 rounded-full text-[10px] font-mono`}>
+                            <Clock className="w-2.5 h-2.5" />
+                            {fresh.label}
+                          </div>
+                        );
+                      })()}
                       <div className="text-gray-600 font-mono truncate">{url.url}</div>
                       <a
                         href={url.url}
@@ -392,6 +442,61 @@ export default function ResultsPage() {
                       {assets.schemaMarkup.isValid && (
                         <div className="mt-2 text-xs text-green-400 flex items-center gap-1">
                           <Check className="w-3 h-3" /> Valid JSON-LD
+                        </div>
+                      )}
+                      {/* Schema Validation Button */}
+                      <button
+                        onClick={runSchemaValidation}
+                        disabled={validatingSchema}
+                        className="mt-3 w-full bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-colors px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {validatingSchema ? (
+                          <><Loader2 className="w-3 h-3 animate-spin" /> Validating...</>
+                        ) : (
+                          <><Zap className="w-3 h-3" /> Test Schema Against Schema.org</>
+                        )}
+                      </button>
+                      {/* Validation Results */}
+                      {schemaValidation && (
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-gray-400">Validation Score</span>
+                            <span className={`text-sm font-mono font-bold ${
+                              schemaValidation.score >= 80 ? "text-green-400" :
+                              schemaValidation.score >= 50 ? "text-yellow-400" : "text-red-400"
+                            }`}>
+                              {schemaValidation.score}/100
+                            </span>
+                          </div>
+                          {schemaValidation.errors.length > 0 && (
+                            <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-2 space-y-1">
+                              {schemaValidation.errors.map((err, i) => (
+                                <div key={i} className="text-[11px] text-red-400 flex items-start gap-1">
+                                  <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                                  <span><span className="font-mono text-red-500">{err.path}</span>: {err.message}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {schemaValidation.warnings.length > 0 && (
+                            <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-lg p-2 space-y-1">
+                              {schemaValidation.warnings.map((w, i) => (
+                                <div key={i} className="text-[11px] text-yellow-400">
+                                  <span className="font-mono">{w.property}</span>: {w.message}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {schemaValidation.recommendations.length > 0 && (
+                            <div className="space-y-1">
+                              {schemaValidation.recommendations.map((r, i) => (
+                                <div key={i} className="text-[11px] text-gray-500 flex items-start gap-1">
+                                  <ArrowRight className="w-3 h-3 shrink-0 mt-0.5 text-blue-400" />
+                                  {r}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </>
@@ -585,6 +690,250 @@ export default function ResultsPage() {
                 of the dominant archetype
               </div>
             )}
+          </section>
+        )}
+
+        {/* Before / After Content Diff */}
+        {assets?.rewrittenCopy && data.domainAnalysis?.page?.content && (
+          <section className="mt-12">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#E74C3C]" />
+                Before &amp; After Preview
+              </h2>
+              <button
+                onClick={() => setShowBeforeAfter(!showBeforeAfter)}
+                className="text-xs text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+              >
+                {showBeforeAfter ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {showBeforeAfter ? "Collapse" : "Expand"}
+              </button>
+            </div>
+            {showBeforeAfter && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Before: Current Content */}
+                <div className="bg-[#0F0F0F] border border-red-500/20 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2.5 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span className="text-xs text-red-400 font-mono uppercase tracking-widest">Current Content</span>
+                    <span className="text-[10px] text-gray-600 ml-auto">
+                      {data.domainAnalysis.page.wordCount || "—"} words
+                    </span>
+                  </div>
+                  <div className="p-4 max-h-[400px] overflow-y-auto">
+                    <div className="text-xs text-gray-400 leading-relaxed whitespace-pre-wrap font-mono">
+                      {data.domainAnalysis.page.content.slice(0, 3000)}
+                      {data.domainAnalysis.page.content.length > 3000 && (
+                        <span className="text-gray-600">... (truncated)</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* After: Rewritten Content */}
+                <div className="bg-[#0F0F0F] border border-green-500/20 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2.5 bg-green-500/5 border-b border-green-500/10 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span className="text-xs text-green-400 font-mono uppercase tracking-widest">Optimized Content</span>
+                    <span className="text-[10px] text-gray-600 ml-auto">
+                      {assets.rewrittenCopy.wordCount} words
+                    </span>
+                  </div>
+                  <div className="p-4 max-h-[400px] overflow-y-auto">
+                    <div className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      {assets.rewrittenCopy.markdown.slice(0, 3000)}
+                      {assets.rewrittenCopy.markdown.length > 3000 && (
+                        <span className="text-gray-600">... (full version in PDF brief)</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Collapsed Summary */}
+            {!showBeforeAfter && (
+              <div className="bg-[#0F0F0F] border border-white/10 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-6 text-xs">
+                  <div>
+                    <span className="text-gray-600">Current: </span>
+                    <span className="text-red-400 font-mono">{data.domainAnalysis.page.wordCount || "—"} words</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-600" />
+                  <div>
+                    <span className="text-gray-600">Optimized: </span>
+                    <span className="text-green-400 font-mono">{assets.rewrittenCopy.wordCount} words</span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-600">Click expand to compare</div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Competitor Citation Heatmap */}
+        {data.extractionResults && data.extractionResults.pages.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-purple-400" />
+              Competitor Citation Heatmap
+            </h2>
+            <div className="bg-[#0F0F0F] border border-white/10 rounded-xl overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left text-gray-500 font-mono uppercase tracking-widest px-4 py-3 text-[10px]">Domain</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">Schema</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">FAQ</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">Headings</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">Words</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">Entities</th>
+                    <th className="text-center text-gray-500 font-mono uppercase tracking-widest px-3 py-3 text-[10px]">Cited</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.extractionResults.pages.map((page, i) => {
+                    let host = "unknown";
+                    try { host = new URL(page.url).hostname.replace("www.", ""); } catch { /* skip */ }
+                    const schemaCount = page.schemaMarkup?.length || 0;
+                    const faqCount = page.faqSections?.length || 0;
+                    const headingCount = page.headings?.length || 0;
+                    const wordCount = page.wordCount || 0;
+                    const entityCount = page.entityMentions?.length || 0;
+                    const citedUrl = citedUrls.find((u) => {
+                      try { return new URL(u.url).hostname.replace("www.", "") === host; } catch { return false; }
+                    });
+                    const citationCount = citedUrl?.citationCount || 0;
+
+                    const heatCell = (value: number, thresholds: [number, number]) => {
+                      if (value >= thresholds[1]) return "bg-green-500/20 text-green-400";
+                      if (value >= thresholds[0]) return "bg-yellow-500/20 text-yellow-400";
+                      return "bg-red-500/20 text-red-400";
+                    };
+
+                    // Check if this is the user's domain
+                    const userHost = (() => {
+                      try { return new URL(data.domain || "").hostname.replace("www.", ""); } catch { return ""; }
+                    })();
+                    const isUserDomain = host === userHost;
+
+                    return (
+                      <tr
+                        key={i}
+                        className={`border-b border-white/5 ${isUserDomain ? "bg-[#E74C3C]/5 border-l-2 border-l-[#E74C3C]" : "hover:bg-white/[0.02]"}`}
+                      >
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`https://www.google.com/s2/favicons?domain=${host}&sz=16`}
+                              alt=""
+                              width={14}
+                              height={14}
+                              className="rounded"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            />
+                            <span className={`font-mono truncate max-w-[140px] ${isUserDomain ? "text-[#E74C3C] font-bold" : "text-gray-300"}`}>
+                              {host}
+                            </span>
+                            {isUserDomain && (
+                              <span className="text-[8px] bg-[#E74C3C]/20 text-[#E74C3C] px-1.5 py-0.5 rounded-full">YOU</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className={`text-center px-3 py-2.5 rounded ${heatCell(schemaCount, [1, 2])}`}>
+                          {schemaCount > 0 ? `${schemaCount} type${schemaCount > 1 ? "s" : ""}` : "—"}
+                        </td>
+                        <td className={`text-center px-3 py-2.5 rounded ${heatCell(faqCount, [1, 3])}`}>
+                          {faqCount > 0 ? `${faqCount} Q&A` : "—"}
+                        </td>
+                        <td className={`text-center px-3 py-2.5 rounded ${heatCell(headingCount, [3, 6])}`}>
+                          {headingCount}
+                        </td>
+                        <td className={`text-center px-3 py-2.5 rounded ${heatCell(wordCount, [500, 1500])}`}>
+                          {wordCount > 0 ? wordCount.toLocaleString() : "—"}
+                        </td>
+                        <td className={`text-center px-3 py-2.5 rounded ${heatCell(entityCount, [3, 8])}`}>
+                          {entityCount}
+                        </td>
+                        <td className="text-center px-3 py-2.5">
+                          <span className="text-[#E74C3C] font-mono font-bold">{citationCount}×</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {/* Legend */}
+              <div className="px-4 py-2.5 border-t border-white/5 flex items-center gap-4 text-[10px] text-gray-600">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500/40"></span> Strong</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-yellow-500/40"></span> Average</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red-500/40"></span> Weak / Missing</span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Freshness Overview */}
+        {citedUrls.some(u => u.publishedDate) && (
+          <section className="mt-12">
+            <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-400" />
+              Content Freshness
+            </h2>
+            <div className="bg-[#0F0F0F] border border-white/10 rounded-xl p-5">
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                {(() => {
+                  const datesInDays = citedUrls
+                    .filter(u => u.publishedDate)
+                    .map(u => Math.floor((Date.now() - new Date(u.publishedDate!).getTime()) / (1000 * 60 * 60 * 24)));
+                  const fresh = datesInDays.filter(d => d < 90).length;
+                  const aging = datesInDays.filter(d => d >= 90 && d < 365).length;
+                  const stale = datesInDays.filter(d => d >= 365).length;
+                  return (
+                    <>
+                      <div className="bg-green-500/5 border border-green-500/10 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-mono font-bold text-green-400">{fresh}</div>
+                        <div className="text-[10px] text-gray-500 uppercase mt-1">Fresh (&lt;90d)</div>
+                      </div>
+                      <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-mono font-bold text-yellow-400">{aging}</div>
+                        <div className="text-[10px] text-gray-500 uppercase mt-1">Aging (90d–1y)</div>
+                      </div>
+                      <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-mono font-bold text-red-400">{stale}</div>
+                        <div className="text-[10px] text-gray-500 uppercase mt-1">Stale (&gt;1y)</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+              {/* Freshness timeline bars */}
+              <div className="space-y-1.5">
+                {citedUrls.filter(u => u.publishedDate).slice(0, 10).map((url, i) => {
+                  const fresh = getFreshness(url.publishedDate);
+                  let host = "unknown";
+                  try { host = new URL(url.url).hostname.replace("www.", ""); } catch { /* skip */ }
+                  const days = url.publishedDate ? Math.floor((Date.now() - new Date(url.publishedDate).getTime()) / (1000 * 60 * 60 * 24)) : 999;
+                  const barWidth = Math.max(5, Math.min(100, 100 - (days / 365) * 100));
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="text-[10px] text-gray-500 font-mono w-28 truncate">{host}</span>
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            fresh.color === "text-green-400" ? "bg-green-500" :
+                            fresh.color === "text-yellow-400" ? "bg-yellow-500" :
+                            fresh.color === "text-orange-400" ? "bg-orange-500" : "bg-red-500"
+                          }`}
+                          style={{ width: `${barWidth}%`, opacity: 0.6 }}
+                        />
+                      </div>
+                      <span className={`text-[10px] font-mono ${fresh.color} w-14 text-right`}>{fresh.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </section>
         )}
 

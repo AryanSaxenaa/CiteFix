@@ -67,6 +67,7 @@ export async function searchCitations(
           faviconUrl: r.faviconUrl,
           citationCount: 1,
           queryVariant: variant,
+          publishedDate: r.publishedDate,
         });
       }
     }
@@ -89,6 +90,7 @@ async function searchSingle(
     description: string;
     snippets: string[];
     faviconUrl?: string;
+    publishedDate?: string;
   }[]
 > {
   const startTime = Date.now();
@@ -121,12 +123,14 @@ async function searchSingle(
         description: string;
         snippets?: string[];
         favicon_url?: string;
+        page_age?: string;
       }) => ({
         url: r.url,
         title: r.title || "",
         description: r.description || "",
         snippets: r.snippets || [],
         faviconUrl: r.favicon_url,
+        publishedDate: r.page_age || undefined,
       })
     );
   } catch (err) {

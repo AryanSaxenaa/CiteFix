@@ -65,6 +65,7 @@ export interface CitedUrl {
   faviconUrl?: string;
   citationCount: number;
   queryVariant: string;
+  publishedDate?: string; // ISO date-time from You.com page_age
 }
 
 export interface DiscoveryResults {
