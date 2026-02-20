@@ -153,10 +153,7 @@ export default function ResultsPage() {
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
         <div className="bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-full pl-6 pr-2 py-2 flex items-center gap-8 shadow-2xl shadow-black/50">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-6 h-6 flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
-              <Sparkles className="relative text-white w-3 h-3" />
-            </div>
+            <img src="/logo.png" alt="Scoutlytics" className="w-7 h-7 object-contain" />
             <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
           <Link href="/analyze" className="text-xs text-gray-400 hover:text-white transition-colors hidden sm:block">

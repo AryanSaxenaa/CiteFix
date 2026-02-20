@@ -34,10 +34,7 @@ export default function Home() {
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 nav-island">
         <div className="bg-[#111]/80 backdrop-blur-xl border border-white/10 rounded-full pl-6 pr-2 py-2 flex items-center justify-between gap-12 shadow-2xl shadow-black/50">
           <div className="flex items-center gap-3">
-            <div className="relative w-6 h-6 flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#E74C3C] rotate-45 rounded-sm"></div>
-              <Sparkles className="relative text-white w-3 h-3" />
-            </div>
+            <img src="/logo.png" alt="Scoutlytics" className="w-7 h-7 object-contain" />
             <span className="font-serif font-bold text-lg tracking-tight">
               Scoutlytics
             </span>
@@ -506,9 +503,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-6 h-6 bg-[#E74C3C] flex items-center justify-center rounded-sm">
-                <Sparkles className="text-white w-3 h-3" />
-              </div>
+              <img src="/logo.png" alt="Scoutlytics" className="w-7 h-7 object-contain" />
               <span className="text-xl font-serif font-bold text-white">
                 Scoutlytics
               </span>
