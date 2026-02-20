@@ -34,7 +34,7 @@ export async function POST(
   // Try Foxit PDF first
   try {
     updateJob(jobId, {
-      stage: 5,
+      stage: 6,
       stageLabel: "Generating PDF implementation brief via Foxit...",
     });
 
@@ -46,7 +46,7 @@ export async function POST(
     const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
     updateJob(jobId, {
-      stage: 5,
+      stage: 6,
       stageLabel: "PDF brief generated",
       pdfUrl,
       status: "complete",
@@ -63,7 +63,7 @@ export async function POST(
   // Fallback: generate DOCX
   try {
     updateJob(jobId, {
-      stage: 5,
+      stage: 6,
       stageLabel: "Generating DOCX implementation brief...",
     });
 
@@ -74,7 +74,7 @@ export async function POST(
     const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
     updateJob(jobId, {
-      stage: 5,
+      stage: 6,
       stageLabel: "Implementation brief generated (DOCX)",
       pdfUrl,
       status: "complete",
@@ -87,7 +87,7 @@ export async function POST(
     console.error(`[PDF] DOCX fallback also failed for job ${jobId}: ${docxMsg}`);
 
     updateJob(jobId, {
-      stage: 5,
+      stage: 6,
       stageLabel: "Analysis complete (brief generation encountered an issue)",
       status: "complete",
       completedAt: Date.now(),

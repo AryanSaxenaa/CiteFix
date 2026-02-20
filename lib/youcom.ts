@@ -1,7 +1,35 @@
-import { CitedUrl, ExtractedPage, HeadingNode, SchemaMarkupInfo, FaqItem } from "./types";
+import { CitedUrl, ExtractedPage, HeadingNode, SchemaMarkupInfo, FaqItem, ApiCallRecord } from "./types";
 
 const SEARCH_BASE = "https://ydc-index.io/v1/search";
 const AGENT_BASE = "https://api.you.com/v1/agents/runs";
+
+// Global API call tracker
+const apiCallLog: ApiCallRecord[] = [];
+
+export function getApiCallLog(): ApiCallRecord[] {
+  return [...apiCallLog];
+}
+
+export function clearApiCallLog(): void {
+  apiCallLog.length = 0;
+}
+
+function trackApiCall(
+  api: ApiCallRecord["api"],
+  endpoint: string,
+  startTime: number,
+  status: "success" | "error",
+  details?: string
+): void {
+  apiCallLog.push({
+    api,
+    endpoint,
+    timestamp: startTime,
+    durationMs: Date.now() - startTime,
+    status,
+    details,
+  });
+}
 
 function getApiKey(): string {
   const key = process.env.YOU_API_KEY;
@@ -63,43 +91,55 @@ async function searchSingle(
     faviconUrl?: string;
   }[]
 > {
+  const startTime = Date.now();
   const params = new URLSearchParams({
     query,
     count: String(count),
   });
   if (country) params.set("country", country);
 
-  const res = await fetch(`${SEARCH_BASE}?${params.toString()}`, {
-    headers: { "X-API-Key": getApiKey() },
-  });
+  try {
+    const res = await fetch(`${SEARCH_BASE}?${params.toString()}`, {
+      headers: { "X-API-Key": getApiKey() },
+    });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`You.com Search API error ${res.status}: ${text}`);
+    if (!res.ok) {
+      const text = await res.text();
+      trackApiCall("search", `Search: "${query}"`, startTime, "error", `${res.status}: ${text}`);
+      throw new Error(`You.com Search API error ${res.status}: ${text}`);
+    }
+
+    const data = await res.json();
+    const webResults = data.results?.web || [];
+
+    trackApiCall("search", `Search: "${query}"`, startTime, "success", `${webResults.length} results`);
+
+    return webResults.map(
+      (r: {
+        url: string;
+        title: string;
+        description: string;
+        snippets?: string[];
+        favicon_url?: string;
+      }) => ({
+        url: r.url,
+        title: r.title || "",
+        description: r.description || "",
+        snippets: r.snippets || [],
+        faviconUrl: r.favicon_url,
+      })
+    );
+  } catch (err) {
+    if (!apiCallLog.find(c => c.timestamp === startTime)) {
+      trackApiCall("search", `Search: "${query}"`, startTime, "error", String(err));
+    }
+    throw err;
   }
-
-  const data = await res.json();
-  const webResults = data.results?.web || [];
-
-  return webResults.map(
-    (r: {
-      url: string;
-      title: string;
-      description: string;
-      snippets?: string[];
-      favicon_url?: string;
-    }) => ({
-      url: r.url,
-      title: r.title || "",
-      description: r.description || "",
-      snippets: r.snippets || [],
-      faviconUrl: r.favicon_url,
-    })
-  );
 }
 
 // Content Extraction — uses Search API with livecrawl to get full page content
 export async function extractPageContent(url: string): Promise<ExtractedPage> {
+  const startTime = Date.now();
   const params = new URLSearchParams({
     query: `site:${new URL(url).hostname}`,
     count: "1",
@@ -107,31 +147,41 @@ export async function extractPageContent(url: string): Promise<ExtractedPage> {
     livecrawl_formats: "markdown",
   });
 
-  const res = await fetch(`${SEARCH_BASE}?${params.toString()}`, {
-    headers: { "X-API-Key": getApiKey() },
-  });
+  try {
+    const res = await fetch(`${SEARCH_BASE}?${params.toString()}`, {
+      headers: { "X-API-Key": getApiKey() },
+    });
 
-  if (!res.ok) {
-    throw new Error(`You.com Contents extraction failed for ${url}: ${res.status}`);
+    if (!res.ok) {
+      trackApiCall("contents", `Livecrawl: ${new URL(url).hostname}`, startTime, "error", `${res.status}`);
+      throw new Error(`You.com Contents extraction failed for ${url}: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const webResults = data.results?.web || [];
+
+    // Find the matching result or use first
+    const match =
+      webResults.find(
+        (r: { url: string }) =>
+          r.url === url || r.url.includes(new URL(url).hostname)
+      ) || webResults[0];
+
+    if (!match) {
+      trackApiCall("contents", `Livecrawl: ${new URL(url).hostname}`, startTime, "success", "No content found");
+      return createEmptyPage(url);
+    }
+
+    const content = match.contents?.markdown || match.contents?.html || match.description || "";
+    trackApiCall("contents", `Livecrawl: ${new URL(url).hostname}`, startTime, "success", `${content.length} chars extracted`);
+
+    return parsePage(url, match.title || "", content);
+  } catch (err) {
+    if (!apiCallLog.find(c => c.timestamp === startTime)) {
+      trackApiCall("contents", `Livecrawl: ${new URL(url).hostname}`, startTime, "error", String(err));
+    }
+    throw err;
   }
-
-  const data = await res.json();
-  const webResults = data.results?.web || [];
-
-  // Find the matching result or use first
-  const match =
-    webResults.find(
-      (r: { url: string }) =>
-        r.url === url || r.url.includes(new URL(url).hostname)
-    ) || webResults[0];
-
-  if (!match) {
-    return createEmptyPage(url);
-  }
-
-  const content = match.contents?.markdown || match.contents?.html || match.description || "";
-
-  return parsePage(url, match.title || "", content);
 }
 
 // Batch extraction for multiple URLs
@@ -146,40 +196,100 @@ export async function extractMultiplePages(
 
 // Agent API — for complex research and content generation
 export async function runExpressAgent(input: string): Promise<string> {
-  const res = await fetch(AGENT_BASE, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${getApiKey()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      agent: "express",
-      input,
-      stream: false,
-    }),
-  });
+  const startTime = Date.now();
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`You.com Agent API error ${res.status}: ${text}`);
-  }
+  try {
+    const res = await fetch(AGENT_BASE, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getApiKey()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        agent: "express",
+        input,
+        stream: false,
+      }),
+    });
 
-  const data = await res.json();
-  // Extract the text response from the agent
-  if (data.output) {
-    if (typeof data.output === "string") return data.output;
-    if (Array.isArray(data.output)) {
-      return data.output
-        .filter((item: { type: string }) => item.type === "text")
-        .map((item: { text: string }) => item.text)
-        .join("\n");
+    if (!res.ok) {
+      const text = await res.text();
+      trackApiCall("express-agent", `Express Agent: ${input.slice(0, 60)}...`, startTime, "error", `${res.status}: ${text}`);
+      throw new Error(`You.com Agent API error ${res.status}: ${text}`);
     }
-  }
 
-  return JSON.stringify(data);
+    const data = await res.json();
+    let result = "";
+    // Extract the text response from the agent
+    if (data.output) {
+      if (typeof data.output === "string") result = data.output;
+      else if (Array.isArray(data.output)) {
+        result = data.output
+          .filter((item: { type: string }) => item.type === "text")
+          .map((item: { text: string }) => item.text)
+          .join("\n");
+      }
+    }
+    if (!result) result = JSON.stringify(data);
+
+    trackApiCall("express-agent", `Express Agent: ${input.slice(0, 60)}...`, startTime, "success", `${result.length} chars`);
+    return result;
+  } catch (err) {
+    if (!apiCallLog.find(c => c.timestamp === startTime)) {
+      trackApiCall("express-agent", `Express Agent: ${input.slice(0, 60)}...`, startTime, "error", String(err));
+    }
+    throw err;
+  }
 }
 
-// Streaming agent for advanced research
+// Advanced Agent for deep multi-step research 
+export async function runAdvancedAgent(input: string): Promise<string> {
+  const startTime = Date.now();
+
+  try {
+    const res = await fetch(AGENT_BASE, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getApiKey()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        agent: "advanced",
+        input,
+        stream: false,
+      }),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      trackApiCall("advanced-agent", `Advanced Agent: ${input.slice(0, 60)}...`, startTime, "error", `${res.status}: ${text}`);
+      throw new Error(`You.com Advanced Agent error: ${res.status}: ${text}`);
+    }
+
+    const data = await res.json();
+    let result = "";
+    if (data.output) {
+      if (typeof data.output === "string") result = data.output;
+      else if (Array.isArray(data.output)) {
+        result = data.output
+          .filter((item: { type: string }) => item.type === "text")
+          .map((item: { text: string }) => item.text)
+          .join("\n");
+      }
+    }
+    if (!result) result = JSON.stringify(data);
+
+    trackApiCall("advanced-agent", `Advanced Agent: ${input.slice(0, 60)}...`, startTime, "success", `${result.length} chars`);
+    return result;
+  } catch (err) {
+    if (!apiCallLog.find(c => c.timestamp === startTime)) {
+      trackApiCall("advanced-agent", `Advanced Agent: ${input.slice(0, 60)}...`, startTime, "error", String(err));
+    }
+    throw err;
+  }
+}
+
+// Streaming agent for advanced research (kept for potential future use)
 export async function runAdvancedAgentStream(
   input: string,
   onChunk: (text: string) => void
@@ -241,10 +351,44 @@ export async function runAdvancedAgentStream(
 }
 
 function generateQueryVariants(topic: string): string[] {
+  const base = topic.toLowerCase().trim();
   return [
     topic,
-    `what is the best ${topic}`,
-    `${topic} comparison review`,
+    `what is the best ${base}`,
+    `${base} comparison review`,
+    `how to choose ${base}`,
+    `${base} vs alternatives`,
+  ];
+}
+
+// Generate AI-powered topic intent suggestions using Express Agent
+export async function generateTopicSuggestions(topic: string): Promise<string[]> {
+  try {
+    const prompt = `Given the topic "${topic}", generate exactly 5 related search intent variants that a user might search in AI engines like ChatGPT, Perplexity, or Google AI Overviews. 
+Return ONLY the 5 queries, one per line, with no numbering, no bullets, no extra text. Each should be a natural search query.
+Focus on different intent types: informational, comparison, buying, how-to, and expert opinion.`;
+
+    const response = await runExpressAgent(prompt);
+    const suggestions = response
+      .split("\n")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 5 && s.length < 100 && !s.startsWith("-") && !s.match(/^\d+\./))
+      .slice(0, 5);
+
+    return suggestions.length > 0 ? suggestions : getDefaultSuggestions(topic);
+  } catch {
+    return getDefaultSuggestions(topic);
+  }
+}
+
+function getDefaultSuggestions(topic: string): string[] {
+  const base = topic.toLowerCase().trim();
+  return [
+    `best ${base} 2025`,
+    `${base} vs competitors`,
+    `how to choose ${base}`,
+    `${base} reviews and ratings`,
+    `is ${base} worth it`,
   ];
 }
 

@@ -23,8 +23,8 @@ export async function POST(
 
   try {
     updateJob(jobId, {
-      stage: 4,
-      stageLabel: "Generating implementation assets...",
+      stage: 5,
+      stageLabel: "Generating implementation assets via You.com Express Agent...",
     });
 
     const assets: GeneratedAssets = {};
@@ -134,12 +134,10 @@ Focus on topically relevant internal pages that would strengthen the content's a
     });
 
     updateJob(jobId, {
-      stage: 4,
+      stage: 5,
       stageLabel: "Asset generation complete",
       generatedAssets: assets,
       patternResults: { ...job.patternResults, gaps: updatedGaps },
-      status: "complete",
-      completedAt: Date.now(),
     });
 
     return NextResponse.json({

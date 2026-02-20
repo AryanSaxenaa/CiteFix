@@ -139,14 +139,27 @@ export function generateBriefHtml(job: AnalysisJob): string {
   <h2>4. Gap Report</h2>
   <table class="gap-table">
     <thead>
-      <tr><th>Gap</th><th>Impact</th><th>Difficulty</th><th>Fix Status</th></tr>
+      <tr><th>Gap</th><th>Impact</th><th>Score Impact</th><th>Difficulty</th><th>Fix Status</th></tr>
     </thead>
     <tbody>
       ${gaps
         .map(
           (g) => `<tr>
-        <td><strong>${escapeHtml(g.name)}</strong><br><span style="font-size: 12px; color: #666;">${escapeHtml(g.description)}</span></td>
+        <td>
+          <strong>${escapeHtml(g.name)}</strong><br>
+          <span style="font-size: 12px; color: #666;">${escapeHtml(g.description)}</span>
+          ${g.beforeState && g.afterState ? `
+          <div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="background: #fde8e8; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+              <strong style="color: #E74C3C;">BEFORE:</strong> ${escapeHtml(g.beforeState)}
+            </div>
+            <div style="background: #d4edda; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+              <strong style="color: #27AE60;">AFTER:</strong> ${escapeHtml(g.afterState)}
+            </div>
+          </div>` : ''}
+        </td>
         <td><span class="impact-badge ${g.impactScore > 0.3 ? "impact-high" : g.impactScore > 0.2 ? "impact-medium" : "impact-low"}">+${(g.impactScore * 100).toFixed(0)}%</span></td>
+        <td style="color: #27AE60; font-weight: 600;">${g.scoreImpact ? `+${g.scoreImpact} pts` : '—'}</td>
         <td class="difficulty-${g.difficulty}">${g.difficulty}</td>
         <td>${g.assetGenerated ? "✓ Generated" : "—"}</td>
       </tr>`
@@ -204,8 +217,43 @@ export function generateBriefHtml(job: AnalysisJob): string {
       : ""
   }
 
+  <!-- Advanced Research Insights -->
+  ${job.advancedResearch ? `
+  <h2>9. Advanced Research Insights</h2>
+  <p style="font-size: 13px; color: #666;">Deep research powered by You.com Advanced Agent API — uncovering contradictions, knowledge gaps, and content opportunities.</p>
+
+  ${job.advancedResearch.contradictions.length > 0 ? `
+  <h3 style="color: #E67E22;">⚠ Contradictions Found</h3>
+  <ul style="margin: 8px 0 16px;">
+    ${job.advancedResearch.contradictions.map(c => `<li style="padding: 4px 0; font-size: 14px;">${escapeHtml(c)}</li>`).join('')}
+  </ul>` : ''}
+
+  ${job.advancedResearch.knowledgeGaps.length > 0 ? `
+  <h3 style="color: #F39C12;">◉ Knowledge Gaps in Current Citations</h3>
+  <ul style="margin: 8px 0 16px;">
+    ${job.advancedResearch.knowledgeGaps.map(g => `<li style="padding: 4px 0; font-size: 14px;">${escapeHtml(g)}</li>`).join('')}
+  </ul>` : ''}
+
+  ${job.advancedResearch.contentOpportunities.length > 0 ? `
+  <h3 style="color: #27AE60;">★ Content Opportunities</h3>
+  <ul style="margin: 8px 0 16px;">
+    ${job.advancedResearch.contentOpportunities.map(o => `<li style="padding: 4px 0; font-size: 14px;">${escapeHtml(o)}</li>`).join('')}
+  </ul>` : ''}
+  ` : ''}
+
+  <!-- API Transparency -->
+  ${job.apiTracking ? `
+  <h2>10. Analysis Methodology</h2>
+  <div style="background: #f0f7ff; border: 1px solid #b8daff; border-radius: 6px; padding: 16px; margin: 12px 0;">
+    <p style="font-size: 13px; margin-bottom: 8px;"><strong>APIs Used:</strong> ${[...new Set(job.apiTracking.calls.map(c => c.api))].join(', ')}</p>
+    <p style="font-size: 13px; margin-bottom: 8px;"><strong>Total API Calls:</strong> ${job.apiTracking.totalCalls}</p>
+    <p style="font-size: 13px; margin-bottom: 8px;"><strong>Analysis Duration:</strong> ${(job.apiTracking.totalDurationMs / 1000).toFixed(1)}s</p>
+    ${job.discoveryResults?.queryVariants ? `<p style="font-size: 13px;"><strong>Query Variants:</strong> ${job.discoveryResults.queryVariants.join(' • ')}</p>` : ''}
+  </div>
+  ` : ''}
+
   <!-- Implementation Checklist -->
-  <h2>8. Implementation Checklist</h2>
+  <h2>11. Implementation Checklist</h2>
   <ul class="checklist">
     ${gaps.filter((g) => g.assetGenerated).map((g) => `<li>${escapeHtml(g.name)} — see generated asset above</li>`).join("")}
     <li>Add JSON-LD schema to page &lt;head&gt;</li>

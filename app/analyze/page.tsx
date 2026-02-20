@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sparkles,
@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Zap,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -36,6 +37,12 @@ export default function AnalyzePage() {
   const [error, setError] = useState("");
   const [domainValid, setDomainValid] = useState<boolean | null>(null);
 
+  // Topic suggestions state
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
+  const suggestDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const validateDomain = (value: string) => {
     setDomain(value);
     if (!value.trim()) {
@@ -51,6 +58,54 @@ export default function AnalyzePage() {
     }
   };
 
+  const fetchSuggestions = useCallback(async (topicValue: string) => {
+    if (topicValue.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    try {
+      const res = await fetch("/api/analyze/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: topicValue.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.suggestions) {
+        setSuggestions(data.suggestions);
+      }
+    } catch {
+      // Silently fail — suggestions are optional
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (suggestDebounce.current) clearTimeout(suggestDebounce.current);
+    if (topic.trim().length >= 3) {
+      suggestDebounce.current = setTimeout(() => fetchSuggestions(topic), 800);
+    } else {
+      setSuggestions([]);
+    }
+    return () => {
+      if (suggestDebounce.current) clearTimeout(suggestDebounce.current);
+    };
+  }, [topic, fetchSuggestions]);
+
+  const toggleSuggestion = (suggestion: string) => {
+    setSelectedSuggestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(suggestion)) {
+        next.delete(suggestion);
+      } else {
+        next.add(suggestion);
+      }
+      return next;
+    });
+  };
+
   const handleSubmit = async () => {
     if (!domain.trim() || !topic.trim()) return;
     setLoading(true);
@@ -63,6 +118,7 @@ export default function AnalyzePage() {
         body: JSON.stringify({
           domain: domain.trim(),
           topic: topic.trim(),
+          intentVariants: Array.from(selectedSuggestions),
           config: {
             depth,
             country,
@@ -175,6 +231,46 @@ export default function AnalyzePage() {
               placeholder="e.g. vegan trail running shoes, B2B CRM software, home equity loans"
               className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E74C3C]/50 focus:ring-1 focus:ring-[#E74C3C]/20 transition-all"
             />
+
+            {/* AI-generated intent suggestions */}
+            {(loadingSuggestions || suggestions.length > 0) && (
+              <div className="mt-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb className="w-3 h-3 text-yellow-400" />
+                  <span className="text-xs text-gray-500 font-mono">
+                    {loadingSuggestions ? "Generating intent variants..." : "AI-suggested search intents — click to include"}
+                  </span>
+                </div>
+                {loadingSuggestions ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-3 h-3 animate-spin text-gray-600" />
+                    <span className="text-xs text-gray-600">Analyzing with You.com...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {suggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => toggleSuggestion(s)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                          selectedSuggestions.has(s)
+                            ? "bg-[#E74C3C]/20 border border-[#E74C3C]/50 text-[#E74C3C]"
+                            : "bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-white/20 hover:text-gray-300"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {selectedSuggestions.size > 0 && (
+                  <p className="text-xs text-green-400/60 mt-2 font-mono">
+                    {selectedSuggestions.size} intent{selectedSuggestions.size > 1 ? "s" : ""} selected — will be included in analysis
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Advanced Config Toggle */}

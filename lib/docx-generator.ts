@@ -154,7 +154,7 @@ export async function generateBriefDocx(job: AnalysisJob): Promise<Buffer> {
   if (gaps.length > 0) {
     const headerRow = new TableRow({
       tableHeader: true,
-      children: ["Gap", "Impact", "Difficulty", "Fix Status"].map(
+      children: ["Gap", "Impact", "Score", "Difficulty", "Fix Status"].map(
         (text) =>
           new TableCell({
             children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 18, color: GRAY, font: "Segoe UI" })] })],
@@ -171,11 +171,29 @@ export async function generateBriefDocx(job: AnalysisJob): Promise<Buffer> {
               children: [
                 new Paragraph({ children: [new TextRun({ text: g.name, bold: true, size: 20, font: "Segoe UI" })] }),
                 new Paragraph({ children: [new TextRun({ text: g.description, size: 18, color: GRAY, font: "Segoe UI" })] }),
+                ...(g.beforeState && g.afterState ? [
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: "BEFORE: ", bold: true, size: 16, color: BRAND_COLOR, font: "Segoe UI" }),
+                      new TextRun({ text: g.beforeState, size: 16, color: GRAY, font: "Segoe UI" }),
+                    ],
+                    spacing: { before: 60 },
+                  }),
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: "AFTER: ", bold: true, size: 16, color: GREEN, font: "Segoe UI" }),
+                      new TextRun({ text: g.afterState, size: 16, color: GRAY, font: "Segoe UI" }),
+                    ],
+                  }),
+                ] : []),
               ],
-              width: { size: 50, type: WidthType.PERCENTAGE },
+              width: { size: 40, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               children: [new Paragraph({ children: [new TextRun({ text: `+${(g.impactScore * 100).toFixed(0)}%`, size: 20, color: g.impactScore > 0.3 ? BRAND_COLOR : "856404", font: "Segoe UI" })] })],
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: g.scoreImpact ? `+${g.scoreImpact} pts` : "—", size: 20, color: GREEN, bold: true, font: "Segoe UI" })] })],
             }),
             new TableCell({
               children: [new Paragraph({ children: [new TextRun({ text: g.difficulty, size: 20, color: g.difficulty === "easy" ? GREEN : g.difficulty === "medium" ? "F39C12" : BRAND_COLOR, font: "Segoe UI" })] })],
@@ -289,8 +307,77 @@ export async function generateBriefDocx(job: AnalysisJob): Promise<Buffer> {
     }
   }
 
+  // 9. Advanced Research Insights
+  if (job.advancedResearch) {
+    sections.push(heading("9. Advanced Research Insights"));
+    sections.push(bodyText("Deep research powered by You.com Advanced Agent API — uncovering contradictions, knowledge gaps, and content opportunities."));
+
+    if (job.advancedResearch.contradictions.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "⚠ Contradictions Found", bold: true, size: 24, color: "E67E22", font: "Segoe UI" })],
+          spacing: { before: 160, after: 80 },
+        })
+      );
+      for (const c of job.advancedResearch.contradictions) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${c}`, size: 20, font: "Segoe UI" })],
+            spacing: { after: 60 },
+          })
+        );
+      }
+    }
+
+    if (job.advancedResearch.knowledgeGaps.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "◉ Knowledge Gaps in Current Citations", bold: true, size: 24, color: "F39C12", font: "Segoe UI" })],
+          spacing: { before: 160, after: 80 },
+        })
+      );
+      for (const g of job.advancedResearch.knowledgeGaps) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${g}`, size: 20, font: "Segoe UI" })],
+            spacing: { after: 60 },
+          })
+        );
+      }
+    }
+
+    if (job.advancedResearch.contentOpportunities.length > 0) {
+      sections.push(
+        new Paragraph({
+          children: [new TextRun({ text: "★ Content Opportunities", bold: true, size: 24, color: GREEN, font: "Segoe UI" })],
+          spacing: { before: 160, after: 80 },
+        })
+      );
+      for (const o of job.advancedResearch.contentOpportunities) {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${o}`, size: 20, font: "Segoe UI" })],
+            spacing: { after: 60 },
+          })
+        );
+      }
+    }
+  }
+
+  // 10. API Transparency
+  if (job.apiTracking) {
+    sections.push(heading("10. Analysis Methodology"));
+    const apisUsed = [...new Set(job.apiTracking.calls.map(c => c.api))].join(', ');
+    sections.push(bodyText(`APIs Used: ${apisUsed}`));
+    sections.push(bodyText(`Total API Calls: ${job.apiTracking.totalCalls}`));
+    sections.push(bodyText(`Analysis Duration: ${(job.apiTracking.totalDurationMs / 1000).toFixed(1)}s`));
+    if (job.discoveryResults?.queryVariants) {
+      sections.push(bodyText(`Query Variants: ${job.discoveryResults.queryVariants.join(' • ')}`));
+    }
+  }
+
   // Implementation Checklist
-  sections.push(heading("9. Implementation Checklist"));
+  sections.push(heading("11. Implementation Checklist"));
   const checklistItems = [
     ...gaps.filter((g) => g.assetGenerated).map((g) => `${g.name} — see generated asset above`),
     "Add JSON-LD schema to page <head>",

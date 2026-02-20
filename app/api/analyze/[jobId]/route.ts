@@ -25,6 +25,8 @@ export async function GET(
     domainAnalysis: job.domainAnalysis,
     patternResults: job.patternResults,
     generatedAssets: job.generatedAssets,
+    advancedResearch: job.advancedResearch,
+    apiTracking: job.apiTracking,
     pdfUrl: job.pdfUrl,
     error: job.error,
   };

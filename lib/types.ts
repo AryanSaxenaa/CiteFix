@@ -18,7 +18,34 @@ export interface AnalysisJob {
   domainAnalysis?: DomainAnalysis;
   patternResults?: PatternResults;
   generatedAssets?: GeneratedAssets;
+  advancedResearch?: AdvancedResearchResults;
+  apiTracking?: ApiCallTracking;
   pdfUrl?: string;
+}
+
+// Advanced Agent research results
+export interface AdvancedResearchResults {
+  insights: string;
+  contradictions: string[];
+  knowledgeGaps: string[];
+  contentOpportunities: string[];
+  timestamp: number;
+}
+
+// API call tracking for transparency
+export interface ApiCallTracking {
+  calls: ApiCallRecord[];
+  totalCalls: number;
+  totalDurationMs: number;
+}
+
+export interface ApiCallRecord {
+  api: "search" | "contents" | "express-agent" | "advanced-agent" | "foxit-pdf" | "foxit-docgen";
+  endpoint: string;
+  timestamp: number;
+  durationMs: number;
+  status: "success" | "error";
+  details?: string;
 }
 
 export interface AnalysisConfig {
@@ -113,6 +140,9 @@ export interface GapItem {
   difficulty: "easy" | "medium" | "hard";
   assetGenerated: boolean;
   category: "schema" | "content" | "structure" | "faq" | "headings";
+  scoreImpact?: number; // projected score increase if this gap is fixed
+  beforeState?: string; // current state description
+  afterState?: string; // proposed state after fix
 }
 
 export interface PatternResults {
@@ -179,6 +209,8 @@ export interface AnalysisStatusResponse {
   domainAnalysis?: DomainAnalysis;
   patternResults?: PatternResults;
   generatedAssets?: GeneratedAssets;
+  advancedResearch?: AdvancedResearchResults;
+  apiTracking?: ApiCallTracking;
   pdfUrl?: string;
   error?: string;
 }

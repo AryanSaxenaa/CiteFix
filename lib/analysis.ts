@@ -145,6 +145,9 @@ function identifyGaps(
       difficulty: "easy",
       assetGenerated: true,
       category: "schema",
+      scoreImpact: 15,
+      beforeState: "No schema markup detected on your page",
+      afterState: "Complete JSON-LD schema with Article, FAQPage, and BreadcrumbList types",
     });
   }
 
@@ -161,6 +164,9 @@ function identifyGaps(
       difficulty: "easy",
       assetGenerated: true,
       category: "faq",
+      scoreImpact: 12,
+      beforeState: "No FAQ section found on your page",
+      afterState: "Comprehensive FAQ with 10+ Q&A pairs targeting high-intent queries",
     });
   }
 
@@ -175,6 +181,9 @@ function identifyGaps(
       difficulty: "medium",
       assetGenerated: true,
       category: "headings",
+      scoreImpact: 10,
+      beforeState: `${userHeadings} heading${userHeadings !== 1 ? "s" : ""} with ${domain.headingScore}/100 hierarchy score`,
+      afterState: `${Math.round(avgCitedHeadings)}+ headings with clear H1→H2→H3 hierarchy matching citation archetypes`,
     });
   }
 
@@ -190,6 +199,9 @@ function identifyGaps(
       difficulty: "hard",
       assetGenerated: true,
       category: "content",
+      scoreImpact: 13,
+      beforeState: `${domain.page.wordCount} words with ${domain.contentDepth}/100 depth score`,
+      afterState: `${Math.max(Math.round(avgCitedWords), 1500)}+ words with comprehensive topic coverage matching top-cited pages`,
     });
   }
 
@@ -210,6 +222,9 @@ function identifyGaps(
         difficulty: "easy",
         assetGenerated: true,
         category: "schema",
+        scoreImpact: Math.round(8 + rate * 5),
+        beforeState: `No ${type} schema on your page`,
+        afterState: `Valid ${type} JSON-LD schema with pre-populated data from your content`,
       });
     }
   }
@@ -224,6 +239,9 @@ function identifyGaps(
       difficulty: "medium",
       assetGenerated: true,
       category: "structure",
+      scoreImpact: 7,
+      beforeState: `${domain.page.internalLinks.length} internal links detected`,
+      afterState: `${Math.max(Math.round(avgLinks), 5)}+ strategic internal links connecting topic clusters`,
     });
   }
 

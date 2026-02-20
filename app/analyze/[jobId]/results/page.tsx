@@ -17,6 +17,10 @@ import {
   Loader2,
   ExternalLink,
   BarChart3,
+  Brain,
+  Zap,
+  Clock,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import type { AnalysisStatusResponse } from "@/lib/types";
@@ -251,6 +255,32 @@ export default function ResultsPage() {
                     )}
                   </div>
                   <p className="text-xs text-gray-500 mb-3">{gap.description}</p>
+
+                  {/* Per-gap score projection */}
+                  {gap.scoreImpact && (
+                    <div className="flex items-center gap-2 mb-3 bg-green-500/5 border border-green-500/10 rounded-lg px-3 py-1.5">
+                      <TrendingUp className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-400 font-mono">
+                        +{gap.scoreImpact} pts
+                      </span>
+                      <span className="text-xs text-gray-600">if fixed</span>
+                    </div>
+                  )}
+
+                  {/* Before / After comparison */}
+                  {gap.beforeState && gap.afterState && (
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-2">
+                        <div className="text-[10px] text-red-400 font-mono mb-1">BEFORE</div>
+                        <div className="text-[11px] text-gray-400 leading-snug">{gap.beforeState}</div>
+                      </div>
+                      <div className="bg-green-500/5 border border-green-500/10 rounded-lg p-2">
+                        <div className="text-[10px] text-green-400 font-mono mb-1">AFTER</div>
+                        <div className="text-[11px] text-gray-400 leading-snug">{gap.afterState}</div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-3 text-xs">
                     <span
                       className={`px-2 py-0.5 rounded ${
@@ -480,6 +510,68 @@ export default function ResultsPage() {
           </section>
         )}
 
+        {/* Advanced Research Insights (from Advanced Agent) */}
+        {data.advancedResearch && (
+          <section className="mt-12">
+            <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-400" />
+              Advanced Agent Research Insights
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Contradictions */}
+              {data.advancedResearch.contradictions.length > 0 && (
+                <div className="bg-[#0F0F0F] border border-orange-500/20 rounded-xl p-5">
+                  <h3 className="text-xs text-orange-400 uppercase tracking-widest mb-3 font-mono flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Source Contradictions
+                  </h3>
+                  <div className="space-y-2">
+                    {data.advancedResearch.contradictions.map((c, i) => (
+                      <div key={i} className="text-xs text-gray-400 border-l-2 border-orange-500/30 pl-3">
+                        {c}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Knowledge Gaps */}
+              {data.advancedResearch.knowledgeGaps.length > 0 && (
+                <div className="bg-[#0F0F0F] border border-yellow-500/20 rounded-xl p-5">
+                  <h3 className="text-xs text-yellow-400 uppercase tracking-widest mb-3 font-mono flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    Knowledge Gaps (Opportunities)
+                  </h3>
+                  <div className="space-y-2">
+                    {data.advancedResearch.knowledgeGaps.map((g, i) => (
+                      <div key={i} className="text-xs text-gray-400 border-l-2 border-yellow-500/30 pl-3">
+                        {g}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Content Opportunities */}
+              {data.advancedResearch.contentOpportunities.length > 0 && (
+                <div className="bg-[#0F0F0F] border border-green-500/20 rounded-xl p-5">
+                  <h3 className="text-xs text-green-400 uppercase tracking-widest mb-3 font-mono flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Content Opportunities
+                  </h3>
+                  <div className="space-y-2">
+                    {data.advancedResearch.contentOpportunities.map((o, i) => (
+                      <div key={i} className="text-xs text-gray-400 border-l-2 border-green-500/30 pl-3">
+                        {o}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* API Transparency */}
         <section className="mt-12">
           <button
@@ -487,31 +579,87 @@ export default function ResultsPage() {
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-400 transition-colors"
           >
             {showApiDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            You.com Data Transparency
+            <Activity className="w-4 h-4" />
+            You.com & Foxit Data Transparency
           </button>
           {showApiDetails && (
-            <div className="mt-4 bg-[#0F0F0F] border border-white/10 rounded-xl p-5 text-xs text-gray-500 space-y-2">
-              <div>
-                <span className="text-gray-400">APIs Used:</span> You.com Search API, You.com Express Agent API
+            <div className="mt-4 bg-[#0F0F0F] border border-white/10 rounded-xl p-5 space-y-4">
+              {/* API Summary */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-white/[0.02] rounded-lg p-3 text-center">
+                  <div className="text-2xl font-mono font-bold text-white">
+                    {data.apiTracking?.totalCalls || "—"}
+                  </div>
+                  <div className="text-[10px] text-gray-500 uppercase">Total API Calls</div>
+                </div>
+                <div className="bg-white/[0.02] rounded-lg p-3 text-center">
+                  <div className="text-2xl font-mono font-bold text-white">
+                    {data.apiTracking ? `${(data.apiTracking.totalDurationMs / 1000).toFixed(1)}s` : "—"}
+                  </div>
+                  <div className="text-[10px] text-gray-500 uppercase">Total Duration</div>
+                </div>
+                <div className="bg-white/[0.02] rounded-lg p-3 text-center">
+                  <div className="text-2xl font-mono font-bold text-blue-400">3</div>
+                  <div className="text-[10px] text-gray-500 uppercase">You.com APIs</div>
+                </div>
+                <div className="bg-white/[0.02] rounded-lg p-3 text-center">
+                  <div className="text-2xl font-mono font-bold text-green-400">
+                    {data.apiTracking?.calls.filter(c => c.api.startsWith("foxit")).length || 0}
+                  </div>
+                  <div className="text-[10px] text-gray-500 uppercase">Foxit API Calls</div>
+                </div>
               </div>
-              <div>
-                <span className="text-gray-400">Search Queries:</span>{" "}
-                {data.discoveryResults?.queryVariants?.join(" | ") || "N/A"}
+
+              {/* API Breakdown */}
+              <div className="text-xs space-y-2">
+                <div className="text-gray-400 font-medium">APIs Used:</div>
+                <div className="flex flex-wrap gap-2">
+                  {["You.com Search API", "You.com Contents API (livecrawl)", "You.com Express Agent", "You.com Advanced Agent", "Foxit PDF Services"].map((api, i) => (
+                    <span key={i} className="px-2 py-1 bg-white/5 rounded text-gray-400 border border-white/5">
+                      {api}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div>
-                <span className="text-gray-400">Pages Analyzed:</span>{" "}
-                {data.extractionResults?.extractedCount || 0} cited pages +{" "}
-                1 user domain
+
+              {/* Query Variants */}
+              <div className="text-xs">
+                <div className="text-gray-400 font-medium mb-1">Search Queries Executed:</div>
+                <div className="space-y-1">
+                  {data.discoveryResults?.queryVariants?.map((q, i) => (
+                    <div key={i} className="text-gray-500 font-mono pl-2 border-l border-white/10">
+                      &quot;{q}&quot;
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div>
-                <span className="text-gray-400">Data Extracted:</span>{" "}
-                {new Date().toISOString()}
-              </div>
-              <div className="pt-2 border-t border-white/5">
-                <span className="text-gray-400">All citations:</span>
-                <div className="mt-1 space-y-1">
+
+              {/* Individual API Calls Log */}
+              {data.apiTracking?.calls && data.apiTracking.calls.length > 0 && (
+                <div className="text-xs">
+                  <div className="text-gray-400 font-medium mb-2">API Call Log:</div>
+                  <div className="max-h-[200px] overflow-y-auto space-y-1">
+                    {data.apiTracking.calls.map((call, i) => (
+                      <div key={i} className="flex items-center gap-2 text-gray-600 font-mono py-0.5">
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span className={`shrink-0 ${call.status === "success" ? "text-green-500" : "text-red-500"}`}>
+                          {call.status === "success" ? "✓" : "✗"}
+                        </span>
+                        <span className="text-gray-400 shrink-0">{call.api}</span>
+                        <span className="truncate">{call.details}</span>
+                        <span className="text-gray-700 ml-auto shrink-0">{call.durationMs}ms</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* All Citations */}
+              <div className="pt-2 border-t border-white/5 text-xs">
+                <div className="text-gray-400 font-medium mb-1">All Cited URLs ({citedUrls.length}):</div>
+                <div className="space-y-1 max-h-[150px] overflow-y-auto">
                   {citedUrls.map((u, i) => (
-                    <div key={i}>{u.url} (cited {u.citationCount}×)</div>
+                    <div key={i} className="text-gray-600 font-mono">{u.url} (cited {u.citationCount}×)</div>
                   ))}
                 </div>
               </div>

@@ -12,6 +12,7 @@ import {
   Check,
   Loader2,
   AlertCircle,
+  Brain,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -27,14 +28,14 @@ const STAGES: StageInfo[] = [
   {
     id: 1,
     label: "Citation Discovery",
-    description: "Querying You.com for top-cited pages...",
+    description: "Querying You.com Search API for top-cited pages...",
     icon: <Search className="w-5 h-5" />,
     endpoint: "discover",
   },
   {
     id: 2,
     label: "Content Extraction",
-    description: "Extracting full content from cited pages...",
+    description: "Extracting live content via You.com Contents API...",
     icon: <FileText className="w-5 h-5" />,
     endpoint: "extract",
   },
@@ -47,15 +48,22 @@ const STAGES: StageInfo[] = [
   },
   {
     id: 4,
+    label: "Deep Research",
+    description: "You.com Advanced Agent researching contradictions & gaps...",
+    icon: <Brain className="w-5 h-5" />,
+    endpoint: "research",
+  },
+  {
+    id: 5,
     label: "Asset Generation",
-    description: "Generating implementation assets...",
+    description: "Generating deployment-ready assets via You.com Express Agent...",
     icon: <Wand2 className="w-5 h-5" />,
     endpoint: "generate",
   },
   {
-    id: 5,
-    label: "PDF Brief",
-    description: "Generating PDF via Foxit...",
+    id: 6,
+    label: "Brief Generation",
+    description: "Creating PDF brief via Foxit PDF Services...",
     icon: <FileText className="w-5 h-5" />,
     endpoint: "pdf",
   },
@@ -137,6 +145,7 @@ export default function LoadingPage() {
   const discoveryData = stageResults[1] as { discoveryResults?: { citedUrls: { url: string; title: string; citationCount: number }[] } } | undefined;
   const extractData = stageResults[2] as { extractedCount?: number; domainAnalysis?: { citationStatus: string; contentDepth: number } } | undefined;
   const patternData = stageResults[3] as { patternResults?: { citationProbabilityScore: number; archetypes: { name: string }[] } } | undefined;
+  const researchData = stageResults[4] as { advancedResearch?: { contradictions: number; knowledgeGaps: number; contentOpportunities: number }; partial?: boolean } | undefined;
 
   return (
     <div className="relative min-h-screen text-white font-sans bg-bg-dark">
@@ -330,6 +339,33 @@ export default function LoadingPage() {
                       {patternData.patternResults.archetypes[0].name}
                     </span>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Research preview */}
+            {researchData?.advancedResearch && (
+              <div className="bg-[#0F0F0F] border border-white/10 rounded-xl p-5 animate-fadeIn">
+                <h3 className="text-xs text-gray-500 uppercase tracking-widest mb-3 font-mono">
+                  <Brain className="w-3 h-3 inline mr-1" />
+                  Advanced Agent Research
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Contradictions Found</span>
+                    <span className="text-orange-400 font-mono">{researchData.advancedResearch.contradictions}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Knowledge Gaps</span>
+                    <span className="text-yellow-400 font-mono">{researchData.advancedResearch.knowledgeGaps}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Content Opportunities</span>
+                    <span className="text-green-400 font-mono">{researchData.advancedResearch.contentOpportunities}</span>
+                  </div>
+                </div>
+                {researchData.partial && (
+                  <div className="mt-2 text-xs text-gray-600">Partial results — some research may be limited</div>
                 )}
               </div>
             )}

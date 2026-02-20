@@ -30,22 +30,42 @@ export async function uploadDocument(
   const blob = new Blob([new Uint8Array(fileBuffer)], { type: "application/octet-stream" });
   formData.append("file", blob, filename);
 
-  const res = await fetch(
-    `${FOXIT_BASE}/pdf-services/api/documents/upload`,
-    {
-      method: "POST",
-      headers: authHeaders(false),
-      body: formData,
-    }
-  );
+  console.log(`[Foxit] Uploading ${filename} (${fileBuffer.length} bytes)...`);
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Foxit upload failed ${res.status}: ${text}`);
+  // Try without Basic Auth first (per docs), then with Basic Auth as fallback
+  for (const useBasicAuth of [false, true]) {
+    try {
+      const headers = authHeaders(useBasicAuth);
+      const res = await fetch(
+        `${FOXIT_BASE}/pdf-services/api/documents/upload`,
+        {
+          method: "POST",
+          headers,
+          body: formData,
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(`[Foxit] Upload successful: documentId=${data.documentId} (basicAuth=${useBasicAuth})`);
+        return data.documentId;
+      }
+
+      const text = await res.text();
+      console.error(`[Foxit] Upload attempt (basicAuth=${useBasicAuth}) failed ${res.status}: ${text}`);
+      
+      // If 401, try the other auth method
+      if (res.status === 401) continue;
+      
+      // Other errors are real failures
+      throw new Error(`Foxit upload failed ${res.status}: ${text}`);
+    } catch (err) {
+      if (useBasicAuth) throw err; // Both methods failed
+      console.error(`[Foxit] Upload attempt failed, trying with Basic Auth...`);
+    }
   }
 
-  const data = await res.json();
-  return data.documentId;
+  throw new Error("Foxit upload failed: all auth methods exhausted");
 }
 
 // Convert HTML to PDF
