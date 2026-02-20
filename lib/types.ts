@@ -54,6 +54,7 @@ export interface AnalysisConfig {
   outputFormat: "pdf" | "json" | "both";
   competitors: string[];
   country: string;
+  brandVoiceSamples?: string[];
 }
 
 // Stage 1: Citation Discovery

@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -23,7 +23,7 @@ export async function POST(
 
   try {
     // Stage 2: Extract content from top-cited pages
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 2,
       stageLabel: `Extracting content from ${job.discoveryResults.citedUrls.length} cited pages...`,
     });
@@ -37,7 +37,7 @@ export async function POST(
     };
 
     // Stage 2b: Extract user's domain content
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 2,
       stageLabel: `Analyzing your domain: ${job.domain}...`,
     });
@@ -48,7 +48,7 @@ export async function POST(
       job.discoveryResults.userDomainFound
     );
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 2,
       stageLabel: "Content extraction complete",
       extractionResults,
@@ -68,7 +68,7 @@ export async function POST(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Extraction failed";
-    updateJob(jobId, { status: "failed", error: message });
+    await updateJob(jobId, { status: "failed", error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

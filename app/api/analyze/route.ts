@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       createdAt: Date.now(),
     };
 
-    createJob(job);
+    await createJob(job);
 
     return NextResponse.json({ jobId, status: "pending" });
   } catch (error) {

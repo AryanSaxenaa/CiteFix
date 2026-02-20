@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -21,7 +21,7 @@ export async function POST(
   }
 
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 3,
       stageLabel: "Running deep research with You.com Advanced Agent...",
     });
@@ -88,7 +88,7 @@ CONTENT_OPPORTUNITIES:
       totalDurationMs: apiCalls.reduce((sum, c) => sum + c.durationMs, 0),
     };
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 3,
       stageLabel: "Advanced research complete",
       advancedResearch,
@@ -107,7 +107,7 @@ CONTENT_OPPORTUNITIES:
     // Research failures are non-critical — don't fail the whole pipeline
     console.error("[Advanced Research] Error:", error);
     const apiCalls = getApiCallLog();
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 3,
       stageLabel: "Research complete (partial)",
       apiTracking: {

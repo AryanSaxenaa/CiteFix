@@ -17,7 +17,7 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -34,7 +34,7 @@ export async function POST(
 
   // Strategy 1: Foxit PDF Services (HTML → upload → convert → watermark → compress → download)
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "Generating PDF via Foxit PDF Services...",
     });
@@ -45,7 +45,7 @@ export async function POST(
     briefStore.set(jobId, { buffer: pdfBuffer, format: "pdf" });
     const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "PDF brief generated via Foxit PDF Services",
       pdfUrl,
@@ -62,7 +62,7 @@ export async function POST(
 
   // Strategy 2: Foxit Document Generation API (DOCX template → PDF)
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "Generating brief via Foxit Document Generation API...",
     });
@@ -90,7 +90,7 @@ export async function POST(
       briefStore.set(jobId, { buffer: finalBuffer, format: "pdf" });
       const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
-      updateJob(jobId, {
+      await updateJob(jobId, {
         stage: 6,
         stageLabel: "PDF brief generated via Foxit DocGen API",
         pdfUrl,
@@ -109,7 +109,7 @@ export async function POST(
 
   // Fallback: generate DOCX
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "Generating DOCX implementation brief...",
     });
@@ -120,7 +120,7 @@ export async function POST(
 
     const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "Implementation brief generated (DOCX)",
       pdfUrl,
@@ -133,7 +133,7 @@ export async function POST(
     const docxMsg = docxError instanceof Error ? docxError.message : "DOCX generation failed";
     console.error(`[PDF] DOCX fallback also failed for job ${jobId}: ${docxMsg}`);
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 6,
       stageLabel: "Analysis complete (brief generation encountered an issue)",
       status: "complete",

@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -21,7 +21,7 @@ export async function POST(
   }
 
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 3,
       stageLabel: "Running citation pattern analysis...",
     });
@@ -31,7 +31,7 @@ export async function POST(
       job.domainAnalysis
     );
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 3,
       stageLabel: "Pattern analysis complete",
       patternResults,
@@ -40,7 +40,7 @@ export async function POST(
     return NextResponse.json({ success: true, patternResults });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Analysis failed";
-    updateJob(jobId, { status: "failed", error: message });
+    await updateJob(jobId, { status: "failed", error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

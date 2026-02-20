@@ -51,6 +51,7 @@ export default function AnalyzePage() {
   const [country, setCountry] = useState("US");
   const [sourceTypes, setSourceTypes] = useState<("web" | "news")[]>(["web"]);
   const [competitors, setCompetitors] = useState(["", "", ""]);
+  const [brandVoiceSamples, setBrandVoiceSamples] = useState(["", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [domainValid, setDomainValid] = useState<boolean | null>(null);
@@ -188,6 +189,7 @@ export default function AnalyzePage() {
             sourceTypes,
             outputFormat: "both",
             competitors: competitors.filter((c) => c.trim()),
+            brandVoiceSamples: brandVoiceSamples.filter((s) => s.trim()),
           },
         }),
       });
@@ -225,12 +227,14 @@ export default function AnalyzePage() {
             </div>
             <span className="font-serif font-bold text-lg tracking-tight">Scoutlytics</span>
           </Link>
-          <Link
-            href="/"
-            className="text-xs font-medium text-gray-400 hover:text-white transition-colors hidden sm:block"
-          >
-            ← Back to Home
-          </Link>
+          <div className="hidden sm:flex items-center gap-6">
+            <Link href="/dashboard" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Dashboard
+            </Link>
+            <Link href="/" className="text-xs text-gray-400 hover:text-white transition-colors">
+              ← Home
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -478,6 +482,33 @@ export default function AnalyzePage() {
                 <p className="text-xs text-gray-600 mt-2">
                   Leave empty to auto-detect top competitors from You.com search results
                 </p>
+              </div>
+
+              {/* Brand Voice Samples */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <FileText className="w-4 h-4 inline mr-2" />
+                  Brand Voice Samples (Optional)
+                </label>
+                <p className="text-xs text-gray-600 mb-2">
+                  Paste excerpts from your existing content so generated assets match your brand tone.
+                </p>
+                <div className="space-y-2">
+                  {brandVoiceSamples.map((sample, i) => (
+                    <textarea
+                      key={i}
+                      value={sample}
+                      onChange={(e) => {
+                        const updated = [...brandVoiceSamples];
+                        updated[i] = e.target.value;
+                        setBrandVoiceSamples(updated);
+                      }}
+                      placeholder={`Sample ${i + 1}: Paste a paragraph from your website that represents your brand voice...`}
+                      rows={3}
+                      className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder-gray-700 focus:outline-none focus:border-white/20 resize-y"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           )}

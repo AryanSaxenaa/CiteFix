@@ -18,6 +18,7 @@ import {
   FileText,
   Github,
 } from "lucide-react";
+import InteractiveDemo from "./InteractiveDemo";
 
 export default function Home() {
   return (
@@ -46,8 +47,8 @@ export default function Home() {
             <a href="#demo" className="hover:text-white transition-colors">
               Live Demo
             </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Documentation
+            <a href="/dashboard" className="hover:text-white transition-colors">
+              Dashboard
             </a>
             <a href="#pricing" className="hover:text-white transition-colors">
               Pricing
@@ -421,90 +422,7 @@ export default function Home() {
         </section>
 
         {/* Live Demo Section */}
-        <section id="demo" className="py-24 max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-[#E74C3C] font-mono text-xs uppercase tracking-widest">
-              See It In Action
-            </span>
-            <h2 className="text-4xl mt-2 font-serif">
-              Try the engine right now
-            </h2>
-            <p className="text-gray-400 mt-4 max-w-lg mx-auto">
-              Enter any domain below and watch Scoutlytics analyze its AEO presence in real time. No signup needed.
-            </p>
-          </div>
-
-          <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-[#0c0c0c]">
-            <div className="bg-[#1a1a1a] px-4 py-3 flex items-center justify-between border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              </div>
-              <div className="text-xs text-gray-500 font-mono">
-                scoutlytics — open beta
-              </div>
-              <div className="w-10"></div>
-            </div>
-
-            <div className="p-8 font-mono text-sm h-[400px] overflow-y-auto relative">
-              <div className="text-gray-500 mb-4">
-                // Enter your domain to start analysis
-              </div>
-
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-[#E74C3C]">➜</span>
-                <span className="text-blue-400">~</span>
-                <span className="text-gray-300">scoutlytics analyze yoursite.com --topic &quot;your topic&quot;</span>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <span className="text-green-500">✔</span>
-                  <span className="text-gray-300">Resolving DNS...</span>
-                  <span className="text-gray-600">Done (0.1s)</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-green-500">✔</span>
-                  <span className="text-gray-300">
-                    Querying You.com Search API...
-                  </span>
-                  <span className="text-gray-600">Done (0.4s)</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-green-500">✔</span>
-                  <span className="text-gray-300">
-                    Extracting citation patterns...
-                  </span>
-                  <span className="text-gray-600">Done (0.8s)</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-green-500">✔</span>
-                  <span className="text-gray-300">
-                    Generating implementation assets...
-                  </span>
-                  <span className="text-gray-600">Done (1.2s)</span>
-                </div>
-                <br />
-                <div className="p-4 border border-white/10 bg-white/5 rounded">
-                  <div className="text-[#E74C3C] font-bold mb-2">
-                    3 GAPS FOUND · 3 ASSETS GENERATED
-                  </div>
-                  <div className="text-gray-400">
-                    Your site is missing{" "}
-                    <span className="text-white">FAQPage Schema</span>,{" "}
-                    <span className="text-white">structured content sections</span>, and{" "}
-                    <span className="text-white">entity markup</span> — all present
-                    on top-cited competitors.
-                  </div>
-                  <a href="/analyze" className="mt-4 inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors">
-                    Run Your Own Analysis →
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <InteractiveDemo />
 
         {/* Pricing Section */}
         <section id="pricing" className="py-24 max-w-4xl mx-auto">

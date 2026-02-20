@@ -873,6 +873,81 @@ export default function ResultsPage() {
           </section>
         )}
 
+        {/* Competitor Benchmarking Bar Charts */}
+        {data.extractionResults && data.extractionResults.pages.length > 1 && (() => {
+          const pages = data.extractionResults!.pages;
+          const userHost = (() => {
+            try { return new URL(data.domain || "").hostname.replace("www.", ""); } catch { return ""; }
+          })();
+
+          const metrics = pages.map((p) => {
+            let host = "unknown";
+            try { host = new URL(p.url).hostname.replace("www.", ""); } catch { /* skip */ }
+            return {
+              host,
+              isUser: host === userHost,
+              schema: p.schemaMarkup?.length || 0,
+              faq: p.faqSections?.length || 0,
+              headings: p.headings?.length || 0,
+              words: p.wordCount || 0,
+              entities: p.entityMentions?.length || 0,
+            };
+          }).sort((a, b) => (b.schema + b.faq + b.headings + b.entities) - (a.schema + a.faq + a.headings + a.entities)).slice(0, 8);
+
+          const maxWords = Math.max(...metrics.map(m => m.words), 1);
+          const maxHeadings = Math.max(...metrics.map(m => m.headings), 1);
+          const maxEntities = Math.max(...metrics.map(m => m.entities), 1);
+          const maxFaq = Math.max(...metrics.map(m => m.faq), 1);
+
+          const charts: { label: string; key: "words" | "headings" | "entities" | "faq"; max: number; color: string; format: (v: number) => string }[] = [
+            { label: "Word Count", key: "words", max: maxWords, color: "#3B82F6", format: (v) => v.toLocaleString() },
+            { label: "Headings", key: "headings", max: maxHeadings, color: "#10B981", format: (v) => String(v) },
+            { label: "Entity Mentions", key: "entities", max: maxEntities, color: "#F59E0B", format: (v) => String(v) },
+            { label: "FAQ Items", key: "faq", max: maxFaq, color: "#8B5CF6", format: (v) => String(v) },
+          ];
+
+          return (
+            <section className="mt-12">
+              <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-400" />
+                Competitor Benchmarking
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {charts.map((chart) => (
+                  <div key={chart.key} className="bg-[#0F0F0F] border border-white/10 rounded-xl p-5">
+                    <h3 className="text-xs text-gray-500 font-mono uppercase tracking-widest mb-4">{chart.label}</h3>
+                    <div className="space-y-2">
+                      {metrics.map((m, i) => {
+                        const pct = chart.max > 0 ? (m[chart.key] / chart.max) * 100 : 0;
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <div className={`text-[10px] font-mono truncate w-24 text-right ${m.isUser ? "text-[#E74C3C] font-bold" : "text-gray-500"}`}>
+                              {m.host.length > 14 ? m.host.slice(0, 12) + "…" : m.host}
+                            </div>
+                            <div className="flex-1 h-5 bg-white/5 rounded overflow-hidden relative">
+                              <div
+                                className="h-full rounded transition-all duration-500"
+                                style={{
+                                  width: `${Math.max(pct, 2)}%`,
+                                  backgroundColor: m.isUser ? "#E74C3C" : chart.color,
+                                  opacity: m.isUser ? 1 : 0.5,
+                                }}
+                              />
+                            </div>
+                            <div className={`text-[10px] font-mono w-12 text-right ${m.isUser ? "text-white font-bold" : "text-gray-600"}`}>
+                              {chart.format(m[chart.key])}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
         {/* Freshness Overview */}
         {citedUrls.some(u => u.publishedDate) && (
           <section className="mt-12">

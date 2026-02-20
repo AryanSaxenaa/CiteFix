@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
@@ -22,7 +22,7 @@ export async function POST(
   }
 
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 5,
       stageLabel: "Generating implementation assets via You.com Express Agent...",
     });
@@ -35,6 +35,12 @@ export async function POST(
       (g) => g.category === "content" || g.category === "headings"
     );
     const hasStructureGap = gaps.some((g) => g.category === "structure");
+
+    // Brand voice context for prompts
+    const voiceSamples = job.config.brandVoiceSamples?.filter((s) => s.trim()) ?? [];
+    const voicePrompt = voiceSamples.length > 0
+      ? `\n\nIMPORTANT: Match the following brand voice/tone. Here are samples of their writing style:\n${voiceSamples.map((s, i) => `Sample ${i + 1}: "${s.slice(0, 500)}"`).join("\n")}\nMirror this tone, vocabulary level, and personality in your output.`
+      : "";
 
     // Always generate schema if missing — it's the highest-impact AEO fix
     if (hasSchemaGap || job.domainAnalysis.existingSchemaTypes.length === 0) {
@@ -66,7 +72,7 @@ The schema should be ready to paste into a <script type="application/ld+json"> t
       const faqPrompt = `Generate 10 high-quality FAQ questions and answers about "${job.topic}" for the website ${job.domain}.
 Format as a clean FAQ section. Each question should be on its own line starting with "Q: " and each answer starting with "A: ".
 The answers should be comprehensive, authoritative, and written in a professional tone.
-Make the questions reflect what real users would ask AI search engines about this topic.`;
+Make the questions reflect what real users would ask AI search engines about this topic.${voicePrompt}`;
 
       const faqResponse = await runExpressAgent(faqPrompt);
       const faqSection: ContentSection = {
@@ -76,6 +82,77 @@ Make the questions reflect what real users would ask AI search engines about thi
         html: faqToHtml(faqResponse),
       };
       assets.contentSections = [faqSection];
+    }
+
+    // Generate comparison table
+    {
+      const compPrompt = `Create a detailed comparison table in Markdown for "${job.topic}". 
+Compare the top 5–7 options/solutions/products that people commonly ask AI engines about.
+Use a Markdown table with columns: Name, Key Feature, Pros, Cons, Best For, Rating (out of 5).
+Include ${job.domain} as one of the compared options if applicable.
+Make data realistic and useful. Return ONLY the Markdown table with a brief intro paragraph.${voicePrompt}`;
+
+      try {
+        const compResponse = await runExpressAgent(compPrompt);
+        const compSection: ContentSection = {
+          title: `Comparison: ${job.topic}`,
+          type: "comparison",
+          markdown: compResponse,
+          html: `<div class="comparison-table">${markdownTableToHtml(compResponse)}</div>`,
+        };
+        if (!assets.contentSections) assets.contentSections = [];
+        assets.contentSections.push(compSection);
+      } catch { /* non-critical, continue */ }
+    }
+
+    // Generate how-to guide
+    {
+      const howtoPrompt = `Write a step-by-step "How To" guide for "${job.topic}" targeting the website ${job.domain}.
+Format: start with a brief intro, then numbered steps (Step 1:, Step 2:, etc).
+Include 7-10 actionable steps. Each step should have:
+- A clear heading (## Step N: ...)
+- 2-3 sentences of detail
+- A pro tip where relevant
+End with a summary/conclusion. Return in Markdown format.${voicePrompt}`;
+
+      try {
+        const howtoResponse = await runExpressAgent(howtoPrompt);
+        const howtoSection: ContentSection = {
+          title: `How-To Guide: ${job.topic}`,
+          type: "howto",
+          markdown: howtoResponse,
+          html: `<div class="howto-guide">${howtoResponse.replace(/\n/g, "<br/>")}</div>`,
+        };
+        if (!assets.contentSections) assets.contentSections = [];
+        assets.contentSections.push(howtoSection);
+      } catch { /* non-critical, continue */ }
+    }
+
+    // Generate expert citation section
+    {
+      const expertPrompt = `Create an "Expert Insights" section for "${job.topic}" suitable for ${job.domain}.
+Include 5-7 expert-style quotes/citations with:
+- Expert name (realistic but fictional) and title/affiliation
+- A compelling 2-3 sentence quote providing unique insight
+- A key takeaway from each quote
+
+Format each as:
+> "[quote text]" — **[Name]**, [Title] at [Organization]
+**Key Takeaway:** [takeaway]
+
+Return professional, authoritative Markdown content.${voicePrompt}`;
+
+      try {
+        const expertResponse = await runExpressAgent(expertPrompt);
+        const expertSection: ContentSection = {
+          title: `Expert Insights: ${job.topic}`,
+          type: "expert",
+          markdown: expertResponse,
+          html: `<div class="expert-citations">${expertResponse.replace(/\n/g, "<br/>")}</div>`,
+        };
+        if (!assets.contentSections) assets.contentSections = [];
+        assets.contentSections.push(expertSection);
+      } catch { /* non-critical, continue */ }
     }
 
     // Generate rewritten page copy — generate if content/heading gap or low content depth
@@ -89,7 +166,7 @@ Key requirements:
 - Include specific facts, statistics, and expert-level detail
 - Write in an authoritative, professional tone
 - Structure content so AI engines can easily extract direct answers
-- Include natural question-answer patterns within the content
+- Include natural question-answer patterns within the content${voicePrompt}
 
 Current page content summary: ${job.domainAnalysis.page.content.slice(0, 500)}
 
@@ -133,7 +210,7 @@ Focus on topically relevant internal pages that would strengthen the content's a
       return { ...gap, assetGenerated: generated };
     });
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 5,
       stageLabel: "Asset generation complete",
       generatedAssets: assets,
@@ -151,7 +228,7 @@ Focus on topically relevant internal pages that would strengthen the content's a
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Generation failed";
-    updateJob(jobId, { status: "failed", error: message });
+    await updateJob(jobId, { status: "failed", error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -243,4 +320,42 @@ function parseLinkRecommendations(text: string, domain: string): LinkRecommendat
   }
 
   return recommendations.slice(0, 5);
+}
+
+function markdownTableToHtml(md: string): string {
+  const lines = md.split("\n").filter((l) => l.trim());
+  let html = "";
+  let inTable = false;
+  let headerDone = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+      // Skip separator rows like |---|---|
+      if (/^\|[\s\-:]+\|/.test(trimmed) && !trimmed.match(/[a-zA-Z]/)) {
+        continue;
+      }
+      if (!inTable) {
+        html += "<table>";
+        inTable = true;
+      }
+      const cells = trimmed.slice(1, -1).split("|").map((c) => c.trim());
+      if (!headerDone) {
+        html += "<thead><tr>" + cells.map((c) => `<th>${c}</th>`).join("") + "</tr></thead><tbody>";
+        headerDone = true;
+      } else {
+        html += "<tr>" + cells.map((c) => `<td>${c}</td>`).join("") + "</tr>";
+      }
+    } else {
+      if (inTable) {
+        html += "</tbody></table>";
+        inTable = false;
+      }
+      if (trimmed) {
+        html += `<p>${trimmed}</p>`;
+      }
+    }
+  }
+  if (inTable) html += "</tbody></table>";
+  return html;
 }

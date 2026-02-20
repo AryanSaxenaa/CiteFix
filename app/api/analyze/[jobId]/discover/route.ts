@@ -9,14 +9,14 @@ export async function POST(
   { params }: { params: Promise<{ jobId: string }> }
 ) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
   try {
-    updateJob(jobId, {
+    await updateJob(jobId, {
       status: "running",
       stage: 1,
       stageLabel: `Querying You.com for top-cited pages for "${job.topic}"...`,
@@ -49,7 +49,7 @@ export async function POST(
         : undefined,
     };
 
-    updateJob(jobId, {
+    await updateJob(jobId, {
       stage: 1,
       stageLabel: "Citation discovery complete",
       intentVariants: queryVariants,
@@ -59,7 +59,7 @@ export async function POST(
     return NextResponse.json({ success: true, discoveryResults });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Discovery failed";
-    updateJob(jobId, { status: "failed", error: message });
+    await updateJob(jobId, { status: "failed", error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
