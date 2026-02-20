@@ -82,7 +82,7 @@ export default function Home() {
             <p className="text-xl text-gray-400 max-w-lg leading-relaxed font-light">
               The gap between AEO insight and implementation is costing you
               traffic. We bridge it in{" "}
-              <span className="text-white font-medium">90 seconds</span> with
+              <span className="text-white font-medium">minutes, not weeks</span> with
               deployment-ready code.
             </p>
 
@@ -256,7 +256,7 @@ export default function Home() {
               </h2>
               <p className="text-gray-400 max-w-md">
                 Enter a domain and topic. Get a complete implementation brief
-                with deployment-ready assets in under two minutes.
+                with deployment-ready assets in minutes.
               </p>
             </div>
             <a

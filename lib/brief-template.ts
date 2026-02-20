@@ -38,13 +38,13 @@ export function generateBriefHtml(job: AnalysisJob): string {
       justify-content: space-between;
       align-items: center;
       padding: 10px 0;
-      border-bottom: 2px solid #E74C3C;
+      border-bottom: 2px solid #E8834A;
       margin-bottom: 20px;
     }
     .section-header .logo-text {
       font-size: 13px;
       font-weight: 700;
-      color: #E74C3C;
+      color: #E8834A;
       letter-spacing: 0.5px;
     }
     .section-header .doc-info {
@@ -68,7 +68,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
       display: inline-block;
       width: 56px;
       height: 56px;
-      background: #E74C3C;
+      background: #E8834A;
       border-radius: 8px;
       margin: 0 auto 24px;
       position: relative;
@@ -90,7 +90,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
     }
     .cover .doc-type {
       font-size: 14px;
-      color: #E74C3C;
+      color: #E8834A;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -123,7 +123,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .cover .cover-divider {
       width: 50px;
       height: 3px;
-      background: #E74C3C;
+      background: #E8834A;
       margin: 24px auto;
     }
     .cover .cover-footer {
@@ -139,13 +139,13 @@ export function generateBriefHtml(job: AnalysisJob): string {
       color: #1a1a1a;
       margin: 28px 0 12px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #E74C3C;
+      border-bottom: 2px solid #E8834A;
     }
     h3 { font-size: 14px; color: #333; margin: 18px 0 8px; }
     p { margin-bottom: 10px; font-size: 13px; }
 
     .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
-    .meta-item { background: #f8f8f8; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #E74C3C; }
+    .meta-item { background: #f8f8f8; padding: 12px 14px; border-radius: 6px; border-left: 3px solid #E8834A; }
     .meta-item .label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; font-weight: 600; }
     .meta-item .value { font-size: 15px; font-weight: 700; margin-top: 3px; color: #1a1a1a; }
 
@@ -160,7 +160,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
       margin: 16px 0;
     }
     .score-number { font-size: 40px; font-weight: 800; }
-    .score-current { color: ${score < 40 ? '#E74C3C' : score < 70 ? '#F39C12' : '#27AE60'}; }
+    .score-current { color: ${score < 40 ? '#E8834A' : score < 70 ? '#F39C12' : '#27AE60'}; }
     .score-projected { color: #27AE60; }
     .score-arrow { font-size: 24px; color: #27AE60; }
 
@@ -170,12 +170,12 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .gap-table tr:nth-child(even) { background: #fafafa; }
 
     .impact-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-    .impact-high { background: #fde8e8; color: #E74C3C; }
+    .impact-high { background: #fde8e8; color: #E8834A; }
     .impact-medium { background: #fef3cd; color: #856404; }
     .impact-low { background: #d4edda; color: #155724; }
     .difficulty-easy { color: #27AE60; font-weight: 600; }
     .difficulty-medium { color: #F39C12; font-weight: 600; }
-    .difficulty-hard { color: #E74C3C; font-weight: 600; }
+    .difficulty-hard { color: #E8834A; font-weight: 600; }
 
     .code-block {
       background: #1e1e1e;
@@ -196,7 +196,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .citation-list { list-style: none; }
     .citation-list li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
     .citation-url { color: #2980B9; text-decoration: none; font-size: 13px; font-weight: 500; word-break: break-all; }
-    .citation-count { background: #E74C3C; color: white; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 700; margin-left: 6px; }
+    .citation-count { background: #E8834A; color: white; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 700; margin-left: 6px; }
 
     .section-content {
       background: #f9f9f9;
@@ -212,7 +212,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
 
     .checklist { list-style: none; padding: 0; }
     .checklist li { padding: 6px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
-    .checklist li::before { content: "☐ "; color: #E74C3C; font-weight: 700; }
+    .checklist li::before { content: "☐ "; color: #E8834A; font-weight: 700; }
 
     .archetype-card { background: #f0f7ff; border: 1px solid #b8daff; border-radius: 6px; padding: 14px; margin: 10px 0; }
     .archetype-freq { font-weight: 700; color: #2980B9; }
@@ -225,8 +225,8 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .toc a { color: #2980B9; text-decoration: none; font-size: 13px; }
     .toc a::before { content: counter(toc-counter) ". "; color: #999; font-weight: 600; }
 
-    .doc-footer { margin-top: 36px; padding: 18px 0 12px; border-top: 3px solid #E74C3C; font-size: 11px; color: #999; text-align: center; }
-    .doc-footer strong { color: #E74C3C; }
+    .doc-footer { margin-top: 36px; padding: 18px 0 12px; border-top: 3px solid #E8834A; font-size: 11px; color: #999; text-align: center; }
+    .doc-footer strong { color: #E8834A; }
 
     .section-footer {
       display: flex;
@@ -239,7 +239,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
       color: #ccc;
     }
     .section-footer .confidential {
-      color: #E74C3C;
+      color: #E8834A;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -281,7 +281,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
       </div>
       <div class="cover-meta-row">
         <span class="cover-meta-label">Gaps Found</span>
-        <span class="cover-meta-value" style="color: #E74C3C;">${gaps.length} actionable gaps</span>
+        <span class="cover-meta-value" style="color: #E8834A;">${gaps.length} actionable gaps</span>
       </div>
     </div>
     <div class="cover-footer">
@@ -374,7 +374,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
 
   ${domainAnalysis?.citationStatus === "cited"
     ? `<p style="color: #27AE60; margin-top: 12px;">✓ Your domain appears in current citations.</p>`
-    : `<p style="color: #E74C3C; margin-top: 12px;">✗ Your domain does not currently appear in AI citations for this topic.</p>`
+    : `<p style="color: #E8834A; margin-top: 12px;">✗ Your domain does not currently appear in AI citations for this topic.</p>`
   }
 
   <!-- Citation Archetypes -->
@@ -415,7 +415,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
           ${g.beforeState && g.afterState ? `
           <div style="margin-top: 6px;">
             <div style="background: #fde8e8; padding: 4px 8px; border-radius: 4px; font-size: 10px; margin-bottom: 4px; word-wrap: break-word;">
-              <strong style="color: #E74C3C;">BEFORE:</strong> ${escapeHtml(g.beforeState)}
+              <strong style="color: #E8834A;">BEFORE:</strong> ${escapeHtml(g.beforeState)}
             </div>
             <div style="background: #d4edda; padding: 4px 8px; border-radius: 4px; font-size: 10px; word-wrap: break-word;">
               <strong style="color: #27AE60;">AFTER:</strong> ${escapeHtml(g.afterState)}

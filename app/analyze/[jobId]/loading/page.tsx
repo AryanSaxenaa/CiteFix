@@ -149,7 +149,7 @@ export default function LoadingPage() {
   return (
     <div className="relative min-h-screen text-white font-sans bg-bg-dark">
       <div className="fixed inset-0 bg-grid pointer-events-none z-0"></div>
-      <div className="fixed top-[-20%] right-[-10%] w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed top-[-20%] right-[-10%] w-[800px] h-[800px] bg-orange-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       {/* Nav */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
@@ -171,7 +171,7 @@ export default function LoadingPage() {
             {/* Progress bar */}
             <div className="h-2 bg-[#1a1a1a] rounded-full mb-8 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#E74C3C] to-red-400 rounded-full transition-all duration-700 ease-out"
+                className="h-full bg-gradient-to-r from-[#E8834A] to-orange-400 rounded-full transition-all duration-700 ease-out"
                 style={{ width: `${(currentStage / STAGES.length) * 100}%` }}
               ></div>
             </div>
@@ -185,7 +185,7 @@ export default function LoadingPage() {
                     key={stage.id}
                     className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 ${
                       status === "running"
-                        ? "bg-[#E74C3C]/5 border-[#E74C3C]/30"
+                        ? "bg-[#E8834A]/5 border-[#E8834A]/30"
                         : status === "complete"
                         ? "bg-green-500/5 border-green-500/20"
                         : "bg-[#0F0F0F] border-white/5"
@@ -194,7 +194,7 @@ export default function LoadingPage() {
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
                         status === "running"
-                          ? "bg-[#E74C3C]/20 text-[#E74C3C]"
+                          ? "bg-[#E8834A]/20 text-[#E8834A]"
                           : status === "complete"
                           ? "bg-green-500/20 text-green-400"
                           : "bg-[#1a1a1a] text-gray-600"
@@ -231,18 +231,18 @@ export default function LoadingPage() {
 
             {/* Error */}
             {error && (
-              <div className="mt-6 bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 shrink-0" />
+              <div className="mt-6 bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-orange-400 mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-sm text-red-400 font-medium">Analysis Error</div>
-                  <div className="text-xs text-red-400/70 mt-1">{error}</div>
+                  <div className="text-sm text-orange-400 font-medium">Analysis Error</div>
+                  <div className="text-xs text-orange-400/70 mt-1">{error}</div>
                   <button
                     onClick={() => {
                       setError("");
                       hasStarted.current = false;
                       runPipeline();
                     }}
-                    className="mt-3 text-xs bg-red-500/20 px-3 py-1 rounded text-red-400 hover:bg-red-500/30 transition-colors"
+                    className="mt-3 text-xs bg-orange-500/20 px-3 py-1 rounded text-orange-400 hover:bg-orange-500/30 transition-colors"
                   >
                     Retry
                   </button>
@@ -273,7 +273,7 @@ export default function LoadingPage() {
                           {u.title || new URL(u.url).hostname}
                         </span>
                       </div>
-                      <span className="text-[#E74C3C] text-xs font-mono shrink-0 ml-2">
+                      <span className="text-[#E8834A] text-xs font-mono shrink-0 ml-2">
                         {u.citationCount}×
                       </span>
                     </div>
@@ -318,7 +318,7 @@ export default function LoadingPage() {
                   <div
                     className={`text-4xl font-mono font-bold ${
                       patternData.patternResults.citationProbabilityScore < 40
-                        ? "text-red-400"
+                        ? "text-orange-400"
                         : patternData.patternResults.citationProbabilityScore < 70
                         ? "text-yellow-400"
                         : "text-green-400"

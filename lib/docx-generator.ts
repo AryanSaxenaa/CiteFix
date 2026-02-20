@@ -18,7 +18,7 @@ import {
 } from "docx";
 import { AnalysisJob } from "./types";
 
-const BRAND_COLOR = "E74C3C";
+const BRAND_COLOR = "E8834A";
 const GREEN = "27AE60";
 const GRAY = "666666";
 

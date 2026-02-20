@@ -102,7 +102,7 @@ export default function BriefPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#E74C3C] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#E8834A] animate-spin" />
       </div>
     );
   }
@@ -111,9 +111,9 @@ export default function BriefPage() {
     return (
       <div className="min-h-screen bg-bg-dark flex items-center justify-center text-white">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-orange-400 mx-auto mb-4" />
           <h2 className="text-xl font-serif mb-2">Brief Not Available</h2>
-          <Link href="/analyze" className="text-[#E74C3C] hover:underline">
+          <Link href="/analyze" className="text-[#E8834A] hover:underline">
             Run a new analysis →
           </Link>
         </div>
@@ -203,7 +203,7 @@ export default function BriefPage() {
         <div className="bg-[#0F0F0F] border border-white/10 rounded-2xl overflow-hidden mb-8 relative">
           <div className="px-6 pt-5 pb-3 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-[#E74C3C]" />
+              <Eye className="w-4 h-4 text-[#E8834A]" />
               <span className="text-sm font-medium">Brief Preview</span>
             </div>
             <span className="text-[10px] text-gray-600 font-mono">
@@ -223,7 +223,7 @@ export default function BriefPage() {
               <div className="flex items-center gap-6 bg-white/[0.02] border border-white/5 rounded-xl p-4">
                 <div>
                   <div className="text-[10px] text-gray-600 uppercase">Current</div>
-                  <div className={`text-3xl font-mono font-bold ${score < 40 ? "text-red-400" : score < 70 ? "text-yellow-400" : "text-green-400"}`}>{score}</div>
+                  <div className={`text-3xl font-mono font-bold ${score < 40 ? "text-orange-400" : score < 70 ? "text-yellow-400" : "text-green-400"}`}>{score}</div>
                 </div>
                 <div className="text-gray-600">→</div>
                 <div>
@@ -239,7 +239,7 @@ export default function BriefPage() {
                 {gaps.slice(0, 3).map((gap, i) => (
                   <div key={i} className="flex items-center justify-between bg-white/[0.02] rounded-lg px-3 py-2">
                     <span className="text-xs text-gray-400">{gap.name}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded ${gap.impactScore > 0.3 ? "bg-red-500/20 text-red-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                    <span className={`text-[10px] px-2 py-0.5 rounded ${gap.impactScore > 0.3 ? "bg-orange-500/20 text-orange-400" : "bg-yellow-500/20 text-yellow-400"}`}>
                       +{(gap.impactScore * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -261,7 +261,7 @@ export default function BriefPage() {
               <button
                 onClick={handleDownload}
                 disabled={downloading}
-                className="bg-[#E74C3C] text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-[#c0392b] transition-all flex items-center gap-2 disabled:opacity-50"
+                className="bg-[#E8834A] text-white px-6 py-2 rounded-lg text-xs font-semibold hover:bg-[#C2712F] transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {downloading ? (
                   <><Loader2 className="w-3 h-3 animate-spin" /> Preparing...</>
@@ -277,7 +277,7 @@ export default function BriefPage() {
         <div className="bg-[#0F0F0F] border border-white/10 rounded-2xl overflow-hidden mb-8">
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center gap-3 mb-4">
-              <FileText className="w-5 h-5 text-[#E74C3C]" />
+              <FileText className="w-5 h-5 text-[#E8834A]" />
               <h2 className="text-sm font-medium">Brief Contents</h2>
             </div>
             <div className="space-y-3">
@@ -310,7 +310,7 @@ export default function BriefPage() {
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="w-full bg-[#E74C3C] text-white py-3 rounded-lg text-sm font-semibold hover:bg-[#c0392b] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full bg-[#E8834A] text-white py-3 rounded-lg text-sm font-semibold hover:bg-[#C2712F] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {downloading ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Preparing download...</>
@@ -344,7 +344,7 @@ export default function BriefPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="bg-[#0F0F0F] border border-white/10 rounded-xl p-4">
-            <div className="text-2xl font-mono font-bold text-[#E74C3C]">{score}</div>
+            <div className="text-2xl font-mono font-bold text-[#E8834A]">{score}</div>
             <div className="text-xs text-gray-600 mt-1">Current Score</div>
           </div>
           <div className="bg-[#0F0F0F] border border-white/10 rounded-xl p-4">

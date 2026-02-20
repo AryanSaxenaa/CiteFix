@@ -185,7 +185,7 @@ export default function InteractiveDemo() {
   return (
     <section id="demo" className="py-24 max-w-5xl mx-auto">
       <div className="text-center mb-12">
-        <span className="text-[#E74C3C] font-mono text-xs uppercase tracking-widest">
+        <span className="text-[#E8834A] font-mono text-xs uppercase tracking-widest">
           See It In Action
         </span>
         <h2 className="text-4xl mt-2 font-serif">Try the engine right now</h2>
@@ -222,7 +222,7 @@ export default function InteractiveDemo() {
                   onChange={(e) => setDomain(e.target.value)}
                   placeholder="yoursite.com"
                   disabled={running}
-                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
+                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E8834A]/50 disabled:opacity-50"
                 />
               </div>
               <div className="flex-1">
@@ -233,14 +233,14 @@ export default function InteractiveDemo() {
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="best project management tools"
                   disabled={running}
-                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
+                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E8834A]/50 disabled:opacity-50"
                 />
               </div>
               <div className="flex items-end">
                 <button
                   onClick={runDemo}
                   disabled={running || !domain.trim() || !topic.trim()}
-                  className="bg-[#E74C3C] hover:bg-red-600 text-white px-6 py-2 rounded text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                  className="bg-[#E8834A] hover:bg-orange-600 text-white px-6 py-2 rounded text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                 >
                   {running ? (
                     <>
@@ -274,16 +274,16 @@ export default function InteractiveDemo() {
               </div>
 
               <div className="mt-4 p-4 border border-white/10 bg-white/5 rounded">
-                <div className="text-[#E74C3C] font-bold mb-3">
+                <div className="text-[#E8834A] font-bold mb-3">
                   ANALYSIS COMPLETE — SCORE: {preRunResult.score}/100
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                   <div className="text-center">
-                    <div className="text-xl font-bold text-red-400">{preRunResult.score}</div>
+                    <div className="text-xl font-bold text-orange-400">{preRunResult.score}</div>
                     <div className="text-[9px] text-gray-600 uppercase">Score</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-red-400">{preRunResult.gaps}</div>
+                    <div className="text-xl font-bold text-orange-400">{preRunResult.gaps}</div>
                     <div className="text-[9px] text-gray-600 uppercase">Gaps Found</div>
                   </div>
                   <div className="text-center">
@@ -303,7 +303,7 @@ export default function InteractiveDemo() {
                 </div>
                 <button
                   onClick={() => setShowLive(true)}
-                  className="inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
+                  className="inline-block bg-[#E8834A] hover:bg-orange-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
                 >
                   Try Your Own Domain →
                 </button>
@@ -336,18 +336,18 @@ export default function InteractiveDemo() {
               {/* Results panel */}
               {result && (
                 <div className="mt-4 p-4 border border-white/10 bg-white/5 rounded">
-                  <div className="text-[#E74C3C] font-bold mb-3">
+                  <div className="text-[#E8834A] font-bold mb-3">
                     ANALYSIS COMPLETE — SCORE: {result.score}/100
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                     <div className="text-center">
-                      <div className={`text-xl font-bold ${result.score >= 70 ? "text-green-400" : result.score >= 40 ? "text-yellow-400" : "text-red-400"}`}>
+                      <div className={`text-xl font-bold ${result.score >= 70 ? "text-green-400" : result.score >= 40 ? "text-yellow-400" : "text-orange-400"}`}>
                         {result.score}
                       </div>
                       <div className="text-[9px] text-gray-600 uppercase">Score</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-red-400">{result.gaps}</div>
+                      <div className="text-xl font-bold text-orange-400">{result.gaps}</div>
                       <div className="text-[9px] text-gray-600 uppercase">Gaps Found</div>
                     </div>
                     <div className="text-center">
@@ -374,7 +374,7 @@ export default function InteractiveDemo() {
                   {jobId && (
                     <a
                       href={`/analyze/${jobId}/results`}
-                      className="inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
+                      className="inline-block bg-[#E8834A] hover:bg-orange-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
                     >
                       View Full Results →
                     </a>

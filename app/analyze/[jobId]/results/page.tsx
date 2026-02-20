@@ -75,7 +75,7 @@ export default function ResultsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#E74C3C] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#E8834A] animate-spin" />
       </div>
     );
   }
@@ -84,10 +84,10 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen bg-bg-dark flex items-center justify-center text-white">
         <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-orange-400 mx-auto mb-4" />
           <h2 className="text-xl font-serif mb-2">Results Not Found</h2>
           <p className="text-gray-500 mb-4">This analysis may have expired or not completed.</p>
-          <Link href="/analyze" className="text-[#E74C3C] hover:underline">
+          <Link href="/analyze" className="text-[#E8834A] hover:underline">
             Run a new analysis →
           </Link>
         </div>
@@ -102,8 +102,8 @@ export default function ResultsPage() {
   const citedUrls = data.discoveryResults?.citedUrls ?? [];
   const assets = data.generatedAssets;
 
-  const scoreColor = score < 40 ? "text-red-400" : score < 70 ? "text-yellow-400" : "text-green-400";
-  const scoreBg = score < 40 ? "bg-red-500/10" : score < 70 ? "bg-yellow-500/10" : "bg-green-500/10";
+  const scoreColor = score < 40 ? "text-orange-400" : score < 70 ? "text-yellow-400" : "text-green-400";
+  const scoreBg = score < 40 ? "bg-orange-500/10" : score < 70 ? "bg-yellow-500/10" : "bg-green-500/10";
 
   // Clean escaped JSON-LD for display and copy
   const cleanJsonLd = (raw: string): string => {
@@ -161,7 +161,7 @@ export default function ResultsPage() {
       if (days < 30) return { label: `${Math.floor(days / 7)}w ago`, color: "text-green-400", bgColor: "bg-green-500/10" };
       if (days < 90) return { label: `${Math.floor(days / 30)}mo ago`, color: "text-yellow-400", bgColor: "bg-yellow-500/10" };
       if (days < 365) return { label: `${Math.floor(days / 30)}mo ago`, color: "text-orange-400", bgColor: "bg-orange-500/10" };
-      return { label: `${Math.floor(days / 365)}y ago`, color: "text-red-400", bgColor: "bg-red-500/10" };
+      return { label: `${Math.floor(days / 365)}y ago`, color: "text-orange-400", bgColor: "bg-orange-500/10" };
     } catch {
       return { label: "Unknown", color: "text-gray-600", bgColor: "bg-gray-500/10" };
     }
@@ -195,7 +195,7 @@ export default function ResultsPage() {
           </div>
           <button
             onClick={() => router.push(`/analyze/${jobId}/brief`)}
-            className="bg-[#E74C3C] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#c0392b] transition-all flex items-center gap-2 shadow-lg shadow-red-900/20"
+            className="bg-[#E8834A] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#C2712F] transition-all flex items-center gap-2 shadow-lg shadow-orange-900/20"
           >
             <Download className="w-4 h-4" />
             Download Implementation Brief
@@ -239,7 +239,7 @@ export default function ResultsPage() {
           {/* Left Column: Citation Map */}
           <div className="lg:col-span-1">
             <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#E74C3C]" />
+              <BarChart3 className="w-5 h-5 text-[#E8834A]" />
               Citation Map
             </h2>
             <div className="bg-[#0F0F0F] border border-white/10 rounded-xl overflow-hidden">
@@ -268,12 +268,12 @@ export default function ResultsPage() {
                       <div className="text-xs text-gray-600 truncate">{hostname}</div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <div className="text-xs text-[#E74C3C] font-mono">
+                      <div className="text-xs text-[#E8834A] font-mono">
                         {url.citationCount}×
                       </div>
                       <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#E74C3C] rounded-full"
+                          className="h-full bg-[#E8834A] rounded-full"
                           style={{ width: `${Math.min(100, (url.citationCount / Math.max(...citedUrls.map(u => u.citationCount))) * 100)}%` }}
                         />
                       </div>
@@ -332,7 +332,7 @@ export default function ResultsPage() {
               {gaps.map((gap, i) => (
                 <div
                   key={i}
-                  className="bg-[#0F0F0F] border border-white/10 rounded-xl p-4 hover:border-[#E74C3C]/30 transition-colors"
+                  className="bg-[#0F0F0F] border border-white/10 rounded-xl p-4 hover:border-[#E8834A]/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <h3 className="text-sm font-medium text-white">{gap.name}</h3>
@@ -358,8 +358,8 @@ export default function ResultsPage() {
                   {/* Before / After comparison */}
                   {gap.beforeState && gap.afterState && (
                     <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-2">
-                        <div className="text-[10px] text-red-400 font-mono mb-1">BEFORE</div>
+                      <div className="bg-orange-500/5 border border-orange-500/10 rounded-lg p-2">
+                        <div className="text-[10px] text-orange-400 font-mono mb-1">BEFORE</div>
                         <div className="text-[11px] text-gray-400 leading-snug">{gap.beforeState}</div>
                       </div>
                       <div className="bg-green-500/5 border border-green-500/10 rounded-lg p-2">
@@ -373,7 +373,7 @@ export default function ResultsPage() {
                     <span
                       className={`px-2 py-0.5 rounded ${
                         gap.impactScore > 0.3
-                          ? "bg-red-500/20 text-red-400"
+                          ? "bg-orange-500/20 text-orange-400"
                           : gap.impactScore > 0.2
                           ? "bg-yellow-500/20 text-yellow-400"
                           : "bg-blue-500/20 text-blue-400"
@@ -387,7 +387,7 @@ export default function ResultsPage() {
                           ? "text-green-400"
                           : gap.difficulty === "medium"
                           ? "text-yellow-400"
-                          : "text-red-400"
+                          : "text-orange-400"
                       }`}
                     >
                       {gap.difficulty}
@@ -422,7 +422,7 @@ export default function ResultsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 text-xs py-2 rounded-md transition-colors ${
                     activeTab === tab.id
-                      ? "bg-[#E74C3C] text-white"
+                      ? "bg-[#E8834A] text-white"
                       : "text-gray-500 hover:text-gray-300"
                   }`}
                 >
@@ -439,7 +439,7 @@ export default function ResultsPage() {
                     <>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <FileJson className="w-4 h-4 text-[#E74C3C]" />
+                          <FileJson className="w-4 h-4 text-[#E8834A]" />
                           <span className="text-xs text-gray-400">
                             {assets.schemaMarkup.types.join(", ")}
                           </span>
@@ -482,15 +482,15 @@ export default function ResultsPage() {
                             <span className="text-xs font-medium text-gray-400">Validation Score</span>
                             <span className={`text-sm font-mono font-bold ${
                               schemaValidation.score >= 80 ? "text-green-400" :
-                              schemaValidation.score >= 50 ? "text-yellow-400" : "text-red-400"
+                              schemaValidation.score >= 50 ? "text-yellow-400" : "text-orange-400"
                             }`}>
                               {schemaValidation.score}/100
                             </span>
                           </div>
                           {schemaValidation.errors.length > 0 && (
-                            <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-2 space-y-1">
+                            <div className="bg-orange-500/5 border border-orange-500/10 rounded-lg p-2 space-y-1">
                               {schemaValidation.errors.map((err, i) => (
-                                <div key={i} className="text-[11px] text-red-400 flex items-start gap-1">
+                                <div key={i} className="text-[11px] text-orange-400 flex items-start gap-1">
                                   <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
                                   <span><span className="font-mono text-red-500">{err.path}</span>: {err.message}</span>
                                 </div>
@@ -597,8 +597,8 @@ export default function ResultsPage() {
                             style={{ minHeight: 200, maxHeight: 400 }}
                           >
                             {/* Central hub node — the user's domain */}
-                            <circle cx="80" cy={30 + (assets.internalLinks.recommendations.length * 60) / 2} r="24" fill="#E74C3C" opacity="0.2" stroke="#E74C3C" strokeWidth="2" />
-                            <text x="80" y={34 + (assets.internalLinks.recommendations.length * 60) / 2} textAnchor="middle" fill="#E74C3C" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                            <circle cx="80" cy={30 + (assets.internalLinks.recommendations.length * 60) / 2} r="24" fill="#E8834A" opacity="0.2" stroke="#E8834A" strokeWidth="2" />
+                            <text x="80" y={34 + (assets.internalLinks.recommendations.length * 60) / 2} textAnchor="middle" fill="#E8834A" fontSize="9" fontFamily="monospace" fontWeight="bold">
                               {(() => { try { return new URL(data.domain || "").hostname.replace("www.", "").slice(0, 12); } catch { return "your site"; } })()}
                             </text>
 
@@ -717,7 +717,7 @@ export default function ResultsPage() {
           <section className="mt-12">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#E74C3C]" />
+                <Sparkles className="w-5 h-5 text-[#E8834A]" />
                 Before &amp; After Preview
               </h2>
               <button
@@ -731,10 +731,10 @@ export default function ResultsPage() {
             {showBeforeAfter && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Before: Current Content */}
-                <div className="bg-[#0F0F0F] border border-red-500/20 rounded-xl overflow-hidden">
-                  <div className="px-4 py-2.5 bg-red-500/5 border-b border-red-500/10 flex items-center gap-2">
+                <div className="bg-[#0F0F0F] border border-orange-500/20 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2.5 bg-orange-500/5 border-b border-orange-500/10 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    <span className="text-xs text-red-400 font-mono uppercase tracking-widest">Current Content</span>
+                    <span className="text-xs text-orange-400 font-mono uppercase tracking-widest">Current Content</span>
                     <span className="text-[10px] text-gray-600 ml-auto">
                       {data.domainAnalysis.page.wordCount || "—"} words
                     </span>
@@ -775,7 +775,7 @@ export default function ResultsPage() {
                 <div className="flex items-center gap-6 text-xs">
                   <div>
                     <span className="text-gray-600">Current: </span>
-                    <span className="text-red-400 font-mono">{data.domainAnalysis.page.wordCount || "—"} words</span>
+                    <span className="text-orange-400 font-mono">{data.domainAnalysis.page.wordCount || "—"} words</span>
                   </div>
                   <ArrowRight className="w-4 h-4 text-gray-600" />
                   <div>
@@ -826,7 +826,7 @@ export default function ResultsPage() {
                     const heatCell = (value: number, thresholds: [number, number]) => {
                       if (value >= thresholds[1]) return "bg-green-500/20 text-green-400";
                       if (value >= thresholds[0]) return "bg-yellow-500/20 text-yellow-400";
-                      return "bg-red-500/20 text-red-400";
+                      return "bg-orange-500/20 text-orange-400";
                     };
 
                     // Check if this is the user's domain
@@ -838,7 +838,7 @@ export default function ResultsPage() {
                     return (
                       <tr
                         key={i}
-                        className={`border-b border-white/5 ${isUserDomain ? "bg-[#E74C3C]/5 border-l-2 border-l-[#E74C3C]" : "hover:bg-white/[0.02]"}`}
+                        className={`border-b border-white/5 ${isUserDomain ? "bg-[#E8834A]/5 border-l-2 border-l-[#E8834A]" : "hover:bg-white/[0.02]"}`}
                       >
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
@@ -851,11 +851,11 @@ export default function ResultsPage() {
                               className="rounded"
                               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                             />
-                            <span className={`font-mono truncate max-w-[140px] ${isUserDomain ? "text-[#E74C3C] font-bold" : "text-gray-300"}`}>
+                            <span className={`font-mono truncate max-w-[140px] ${isUserDomain ? "text-[#E8834A] font-bold" : "text-gray-300"}`}>
                               {host}
                             </span>
                             {isUserDomain && (
-                              <span className="text-[8px] bg-[#E74C3C]/20 text-[#E74C3C] px-1.5 py-0.5 rounded-full">YOU</span>
+                              <span className="text-[8px] bg-[#E8834A]/20 text-[#E8834A] px-1.5 py-0.5 rounded-full">YOU</span>
                             )}
                           </div>
                         </td>
@@ -875,7 +875,7 @@ export default function ResultsPage() {
                           {entityCount}
                         </td>
                         <td className="text-center px-3 py-2.5">
-                          <span className="text-[#E74C3C] font-mono font-bold">{citationCount}×</span>
+                          <span className="text-[#E8834A] font-mono font-bold">{citationCount}×</span>
                         </td>
                       </tr>
                     );
@@ -940,7 +940,7 @@ export default function ResultsPage() {
                         const pct = chart.max > 0 ? (m[chart.key] / chart.max) * 100 : 0;
                         return (
                           <div key={i} className="flex items-center gap-2">
-                            <div className={`text-[10px] font-mono truncate w-24 text-right ${m.isUser ? "text-[#E74C3C] font-bold" : "text-gray-500"}`}>
+                            <div className={`text-[10px] font-mono truncate w-24 text-right ${m.isUser ? "text-[#E8834A] font-bold" : "text-gray-500"}`}>
                               {m.host.length > 14 ? m.host.slice(0, 12) + "…" : m.host}
                             </div>
                             <div className="flex-1 h-5 bg-white/5 rounded overflow-hidden relative">
@@ -948,7 +948,7 @@ export default function ResultsPage() {
                                 className="h-full rounded transition-all duration-500"
                                 style={{
                                   width: `${Math.max(pct, 2)}%`,
-                                  backgroundColor: m.isUser ? "#E74C3C" : chart.color,
+                                  backgroundColor: m.isUser ? "#E8834A" : chart.color,
                                   opacity: m.isUser ? 1 : 0.5,
                                 }}
                               />
@@ -993,8 +993,8 @@ export default function ResultsPage() {
                         <div className="text-2xl font-mono font-bold text-yellow-400">{aging}</div>
                         <div className="text-[10px] text-gray-500 uppercase mt-1">Aging (90d–1y)</div>
                       </div>
-                      <div className="bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
-                        <div className="text-2xl font-mono font-bold text-red-400">{stale}</div>
+                      <div className="bg-orange-500/5 border border-orange-500/10 rounded-lg p-3 text-center">
+                        <div className="text-2xl font-mono font-bold text-orange-400">{stale}</div>
                         <div className="text-[10px] text-gray-500 uppercase mt-1">Stale (&gt;1y)</div>
                       </div>
                     </>

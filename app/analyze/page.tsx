@@ -215,7 +215,7 @@ export default function AnalyzePage() {
   return (
     <div className="relative min-h-screen text-white font-sans bg-bg-dark">
       <div className="fixed inset-0 bg-grid pointer-events-none z-0"></div>
-      <div className="fixed top-[-20%] right-[-10%] w-[800px] h-[800px] bg-red-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="fixed top-[-20%] right-[-10%] w-[800px] h-[800px] bg-orange-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
       {/* Nav */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
@@ -237,7 +237,7 @@ export default function AnalyzePage() {
 
       <main className="relative z-10 pt-32 pb-20 px-6 max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/5 text-xs text-red-400 font-mono mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-xs text-orange-400 font-mono mb-6">
             <Zap className="w-3 h-3" />
             CITATION ANALYSIS ENGINE
           </div>
@@ -264,7 +264,7 @@ export default function AnalyzePage() {
                 value={domain}
                 onChange={(e) => handleDomainChange(e.target.value)}
                 placeholder="e.g. nike.com"
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E74C3C]/50 focus:ring-1 focus:ring-[#E74C3C]/20 transition-all"
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E8834A]/50 focus:ring-1 focus:ring-[#E8834A]/20 transition-all"
               />
               {(domainValid !== null || validatingDns) && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -275,8 +275,8 @@ export default function AnalyzePage() {
                       <span className="text-green-400 text-xs">✓</span>
                     </div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
-                      <span className="text-red-400 text-xs">✗</span>
+                    <div className="w-5 h-5 rounded-full bg-orange-500/20 flex items-center justify-center">
+                      <span className="text-orange-400 text-xs">✗</span>
                     </div>
                   )}
                 </div>
@@ -305,7 +305,7 @@ export default function AnalyzePage() {
                     )}
                   </div>
                 ) : dnsResult.error ? (
-                  <div className="text-xs text-red-400 bg-red-500/5 border border-red-500/10 rounded-lg px-3 py-2">
+                  <div className="text-xs text-orange-400 bg-orange-500/5 border border-orange-500/10 rounded-lg px-3 py-2">
                     {dnsResult.error}
                   </div>
                 ) : null}
@@ -324,7 +324,7 @@ export default function AnalyzePage() {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g. vegan trail running shoes, B2B CRM software, home equity loans"
-              className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E74C3C]/50 focus:ring-1 focus:ring-[#E74C3C]/20 transition-all"
+              className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E8834A]/50 focus:ring-1 focus:ring-[#E8834A]/20 transition-all"
             />
 
             {/* AI-generated intent suggestions */}
@@ -350,7 +350,7 @@ export default function AnalyzePage() {
                         onClick={() => toggleSuggestion(s)}
                         className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                           selectedSuggestions.has(s)
-                            ? "bg-[#E74C3C]/20 border border-[#E74C3C]/50 text-[#E74C3C]"
+                            ? "bg-[#E8834A]/20 border border-[#E8834A]/50 text-[#E8834A]"
                             : "bg-[#1a1a1a] border border-white/10 text-gray-400 hover:border-white/20 hover:text-gray-300"
                         }`}
                       >
@@ -392,7 +392,7 @@ export default function AnalyzePage() {
                       onClick={() => setDepth(d)}
                       className={`p-3 rounded-lg border text-center transition-all ${
                         depth === d
-                          ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                          ? "border-[#E8834A] bg-[#E8834A]/10 text-white"
                           : "border-white/10 text-gray-500 hover:border-white/20"
                       }`}
                     >
@@ -415,7 +415,7 @@ export default function AnalyzePage() {
                     onClick={() => toggleSourceType("web")}
                     className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
                       sourceTypes.includes("web")
-                        ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                        ? "border-[#E8834A] bg-[#E8834A]/10 text-white"
                         : "border-white/10 text-gray-500 hover:border-white/20"
                     }`}
                   >
@@ -426,7 +426,7 @@ export default function AnalyzePage() {
                     onClick={() => toggleSourceType("news")}
                     className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
                       sourceTypes.includes("news")
-                        ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                        ? "border-[#E8834A] bg-[#E8834A]/10 text-white"
                         : "border-white/10 text-gray-500 hover:border-white/20"
                     }`}
                   >
@@ -448,7 +448,7 @@ export default function AnalyzePage() {
                       onClick={() => setOutputFormat(fmt)}
                       className={`flex-1 p-3 rounded-lg border transition-all text-sm font-medium ${
                         outputFormat === fmt
-                          ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                          ? "border-[#E8834A] bg-[#E8834A]/10 text-white"
                           : "border-white/10 text-gray-500 hover:border-white/20"
                       }`}
                     >
@@ -466,7 +466,7 @@ export default function AnalyzePage() {
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E74C3C]/50"
+                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E8834A]/50"
                 >
                   {COUNTRIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -534,7 +534,7 @@ export default function AnalyzePage() {
 
           {/* Error */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-400">
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3 text-sm text-orange-400">
               {error}
             </div>
           )}
@@ -545,7 +545,7 @@ export default function AnalyzePage() {
             disabled={!canSubmit}
             className={`w-full py-4 rounded-lg text-sm font-semibold tracking-wide flex items-center justify-center gap-2 transition-all ${
               canSubmit
-                ? "bg-[#E74C3C] text-white hover:bg-[#c0392b] hover:translate-y-[-1px] shadow-lg shadow-red-900/20"
+                ? "bg-[#E8834A] text-white hover:bg-[#C2712F] hover:translate-y-[-1px] shadow-lg shadow-orange-900/20"
                 : "bg-gray-800 text-gray-600 cursor-not-allowed"
             }`}
           >

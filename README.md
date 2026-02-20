@@ -48,7 +48,7 @@ Every existing tool in the market -- Profound, Scrunch AI, Peec AI, Omnia -- sto
 
 Scoutlytics collapses the entire insight-to-implementation gap into a single automated pipeline. Input a domain and topic. Receive deployment-ready assets -- rewritten page copy, valid JSON-LD schema markup, structured content sections -- packaged into a professional PDF implementation brief.
 
-**Total time: under 90 seconds.**
+**Total time: a few minutes.**
 
 ---
 
@@ -61,7 +61,7 @@ Scoutlytics collapses the entire insight-to-implementation gap into a single aut
 | Generates rewritten page copy | No | Yes |
 | Produces ready-to-deploy JSON-LD schema | No | Yes |
 | Delivers professional PDF implementation brief | No | Yes (Foxit PDF Services) |
-| Works in under 90 seconds | No | Yes |
+| Works in minutes, not weeks | No | Yes |
 
 ---
 
