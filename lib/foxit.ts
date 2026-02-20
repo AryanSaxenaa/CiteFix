@@ -204,7 +204,7 @@ export async function addWatermark(
       documentId,
       config: {
         text: watermarkText,
-        opacity: 0.15,
+        opacity: 15,
         rotation: -45,
         fontSize: 48,
         color: "#CCCCCC",
@@ -235,7 +235,12 @@ export async function compressPdf(documentId: string): Promise<string> {
       ...pdfAuthHeaders(false),
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ documentId }),
+    body: JSON.stringify({
+      documentId,
+      config: {
+        compressionLevel: "MEDIUM",
+      },
+    }),
   });
 
   if (!res.ok) {
