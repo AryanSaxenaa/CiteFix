@@ -1,6 +1,7 @@
 const FOXIT_BASE = "https://na1.fusion.foxit.com";
 
-function getCredentials(): { clientId: string; clientSecret: string } {
+// PDF Services credentials
+function getPdfCredentials(): { clientId: string; clientSecret: string } {
   const clientId = process.env.FOXIT_CLIENT_ID;
   const clientSecret = process.env.FOXIT_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -9,8 +10,18 @@ function getCredentials(): { clientId: string; clientSecret: string } {
   return { clientId, clientSecret };
 }
 
-function authHeaders(includeBasicAuth = false): Record<string, string> {
-  const { clientId, clientSecret } = getCredentials();
+// Document Generation credentials (separate keys)
+function getDocGenCredentials(): { clientId: string; clientSecret: string } {
+  const clientId = process.env.FOXIT_DOCGEN_CLIENT_ID;
+  const clientSecret = process.env.FOXIT_DOCGEN_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error("FOXIT_DOCGEN_CLIENT_ID and FOXIT_DOCGEN_CLIENT_SECRET must be set");
+  }
+  return { clientId, clientSecret };
+}
+
+function pdfAuthHeaders(includeBasicAuth = false): Record<string, string> {
+  const { clientId, clientSecret } = getPdfCredentials();
   const headers: Record<string, string> = {
     client_id: clientId,
     client_secret: clientSecret,
@@ -19,6 +30,14 @@ function authHeaders(includeBasicAuth = false): Record<string, string> {
     headers["Authorization"] = "Basic Og==";
   }
   return headers;
+}
+
+function docGenAuthHeaders(): Record<string, string> {
+  const { clientId, clientSecret } = getDocGenCredentials();
+  return {
+    client_id: clientId,
+    client_secret: clientSecret,
+  };
 }
 
 // Upload a file (HTML or DOCX) to Foxit
@@ -35,7 +54,7 @@ export async function uploadDocument(
   // Try without Basic Auth first (per docs), then with Basic Auth as fallback
   for (const useBasicAuth of [false, true]) {
     try {
-      const headers = authHeaders(useBasicAuth);
+      const headers = pdfAuthHeaders(useBasicAuth);
       const res = await fetch(
         `${FOXIT_BASE}/pdf-services/api/documents/upload`,
         {
@@ -68,51 +87,50 @@ export async function uploadDocument(
   throw new Error("Foxit upload failed: all auth methods exhausted");
 }
 
-// Convert HTML to PDF
+// Convert uploaded HTML document to PDF
+// Docs: POST /pdf-services/api/documents/create/pdf-from-html
 export async function htmlToPdf(documentId: string): Promise<string> {
-  // Try PDF creation endpoint (HTML → PDF is classified as "PDF Creation" in Foxit docs)
-  const endpoints = [
-    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/to/pdf`,
-    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/create-pdf`,
-    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/convert/pdf`,
-  ];
+  const endpoint = `${FOXIT_BASE}/pdf-services/api/documents/create/pdf-from-html`;
 
-  let lastError = "";
-  for (const endpoint of endpoints) {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        ...authHeaders(true),
-        "Content-Type": "application/json",
+  console.log(`[Foxit] Converting HTML→PDF via ${endpoint}...`);
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...pdfAuthHeaders(false),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      documentId,
+      config: {
+        dimension: { width: 612, height: 792 },
+        rotation: "NONE",
+        pageMode: "MULTIPLE_PAGE",
+        scalingMode: "SCALE",
       },
-    });
+    }),
+  });
 
-    if (res.ok) {
-      const data = await res.json();
-      return data.taskId;
-    }
-
+  if (!res.ok) {
     const text = await res.text();
-    lastError = `${endpoint} → ${res.status}: ${text}`;
-    console.error(`[Foxit] Endpoint failed: ${lastError}`);
-
-    // 404 means wrong endpoint, try next; other errors are real failures
-    if (res.status !== 404) {
-      throw new Error(`Foxit HTML→PDF conversion failed (${res.status}): ${text}`);
-    }
+    console.error(`[Foxit] HTML→PDF failed ${res.status}: ${text}`);
+    throw new Error(`Foxit HTML→PDF failed (${res.status}): ${text}`);
   }
 
-  throw new Error(`Foxit HTML→PDF: no working endpoint found. Last: ${lastError}`);
+  const data = await res.json();
+  console.log(`[Foxit] HTML→PDF task created: ${data.taskId}`);
+  return data.taskId;
 }
 
 // Check task status (polling)
+// Docs: GET /pdf-services/api/tasks/:task-id
 export async function getTaskStatus(
   taskId: string
 ): Promise<{ status: string; progress: number; resultDocumentId?: string }> {
   const res = await fetch(
     `${FOXIT_BASE}/pdf-services/api/tasks/${taskId}`,
     {
-      headers: authHeaders(true),
+      headers: pdfAuthHeaders(false),
     }
   );
 
@@ -155,7 +173,7 @@ export async function downloadDocument(
   const res = await fetch(
     `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/download${params}`,
     {
-      headers: authHeaders(false),
+      headers: pdfAuthHeaders(false),
     }
   );
 
@@ -168,56 +186,66 @@ export async function downloadDocument(
 }
 
 // Add watermark to a PDF document
+// Docs pattern: POST /pdf-services/api/documents/enhance/... with documentId in body
 export async function addWatermark(
   documentId: string,
   watermarkText: string
 ): Promise<string> {
-  const res = await fetch(
-    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/watermark`,
-    {
-      method: "POST",
-      headers: {
-        ...authHeaders(true),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+  const endpoint = `${FOXIT_BASE}/pdf-services/api/documents/enhance/pdf-watermark`;
+  console.log(`[Foxit] Adding watermark via ${endpoint}...`);
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...pdfAuthHeaders(false),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      documentId,
+      config: {
         text: watermarkText,
         opacity: 0.15,
         rotation: -45,
         fontSize: 48,
         color: "#CCCCCC",
-      }),
-    }
-  );
+      },
+    }),
+  });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Foxit watermark failed: ${text}`);
+    console.error(`[Foxit] Watermark failed ${res.status}: ${text}`);
+    throw new Error(`Foxit watermark failed (${res.status}): ${text}`);
   }
 
   const data = await res.json();
+  console.log(`[Foxit] Watermark task created: ${data.taskId}`);
   return data.taskId;
 }
 
 // Compress a PDF document
+// Docs pattern: POST /pdf-services/api/documents/modify/pdf-compress with documentId in body
 export async function compressPdf(documentId: string): Promise<string> {
-  const res = await fetch(
-    `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/compress`,
-    {
-      method: "POST",
-      headers: {
-        ...authHeaders(true),
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const endpoint = `${FOXIT_BASE}/pdf-services/api/documents/modify/pdf-compress`;
+  console.log(`[Foxit] Compressing PDF via ${endpoint}...`);
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...pdfAuthHeaders(false),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ documentId }),
+  });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Foxit compression failed: ${text}`);
+    console.error(`[Foxit] Compress failed ${res.status}: ${text}`);
+    throw new Error(`Foxit compression failed (${res.status}): ${text}`);
   }
 
   const data = await res.json();
+  console.log(`[Foxit] Compress task created: ${data.taskId}`);
   return data.taskId;
 }
 
@@ -230,7 +258,7 @@ export async function generatePdfFromHtml(
   const htmlBuffer = Buffer.from(htmlContent, "utf-8");
   const uploadedId = await uploadDocument(htmlBuffer, "brief.html");
 
-  // Step 2: Convert to PDF
+  // Step 2: Convert HTML to PDF
   const convertTaskId = await htmlToPdf(uploadedId);
   const pdfDocId = await waitForTask(convertTaskId);
 
@@ -256,32 +284,43 @@ export async function generatePdfFromHtml(
 }
 
 // Document Generation API — template-based document creation
+// Docs: POST /document-generation/api/GenerateDocumentBase64
+// Requires a .docx template with {{tags}}, returns JSON with base64FileString
 export async function generateDocument(
   templateBase64: string,
   documentValues: Record<string, unknown>,
-  outputFormat: "pdf" | "docx" = "pdf"
+  outputFormat: "PDF" | "DOCX" = "PDF"
 ): Promise<Buffer> {
-  const res = await fetch(
-    `${FOXIT_BASE}/docgen-services/api/documents/generate`,
-    {
-      method: "POST",
-      headers: {
-        ...authHeaders(false),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        template: templateBase64,
-        documentValues,
-        outputFormat,
-      }),
-    }
-  );
+  const endpoint = `${FOXIT_BASE}/document-generation/api/GenerateDocumentBase64`;
+
+  console.log(`[Foxit] DocGen: generating ${outputFormat} via ${endpoint}...`);
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      ...docGenAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      base64FileString: templateBase64,
+      documentValues,
+      outputFormat,
+    }),
+  });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Foxit DocGen failed: ${text}`);
+    console.error(`[Foxit] DocGen failed ${res.status}: ${text}`);
+    throw new Error(`Foxit DocGen failed (${res.status}): ${text}`);
   }
 
-  const arrayBuffer = await res.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  // Response is JSON with { message, fileExtension, base64FileString }
+  const data = await res.json();
+  console.log(`[Foxit] DocGen success: ${data.message}, ext=${data.fileExtension}`);
+
+  if (!data.base64FileString) {
+    throw new Error("Foxit DocGen returned no file data");
+  }
+
+  return Buffer.from(data.base64FileString, "base64");
 }

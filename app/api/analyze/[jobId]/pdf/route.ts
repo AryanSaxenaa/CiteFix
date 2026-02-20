@@ -32,22 +32,50 @@ export async function POST(
 
   const hostname = new URL(job.domain).hostname;
 
-  // Strategy 1: Try Foxit Document Generation API (template-driven)
+  // Strategy 1: Foxit PDF Services (HTML → upload → convert → watermark → compress → download)
+  try {
+    updateJob(jobId, {
+      stage: 6,
+      stageLabel: "Generating PDF via Foxit PDF Services...",
+    });
+
+    const briefHtml = generateBriefHtml(job);
+    const pdfBuffer = await generatePdfFromHtml(briefHtml, hostname);
+
+    briefStore.set(jobId, { buffer: pdfBuffer, format: "pdf" });
+    const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
+
+    updateJob(jobId, {
+      stage: 6,
+      stageLabel: "PDF brief generated via Foxit PDF Services",
+      pdfUrl,
+      status: "complete",
+      completedAt: Date.now(),
+    });
+
+    return NextResponse.json({ success: true, pdfUrl, format: "pdf", method: "foxit-pdfservices" });
+  } catch (pdfError) {
+    const pdfMsg = pdfError instanceof Error ? pdfError.message : "PDF generation failed";
+    console.error(`[PDF] Foxit PDF Services failed for job ${jobId}: ${pdfMsg}`);
+    console.log(`[PDF] Falling back to Foxit Document Generation API...`);
+  }
+
+  // Strategy 2: Foxit Document Generation API (DOCX template → PDF)
   try {
     updateJob(jobId, {
       stage: 6,
       stageLabel: "Generating brief via Foxit Document Generation API...",
     });
 
-    // Build the brief HTML as a template and encode as base64
-    const briefHtml = generateBriefHtml(job);
-    const templateBase64 = Buffer.from(briefHtml, "utf-8").toString("base64");
+    // Generate DOCX content first, then send to DocGen to convert to PDF
+    const docxBuffer = await generateBriefDocx(job);
+    const templateBase64 = docxBuffer.toString("base64");
     const docGenValues = buildDocGenValues(job);
 
-    const pdfBuffer = await generateDocument(templateBase64, docGenValues, "pdf");
+    const pdfBuffer = await generateDocument(templateBase64, docGenValues, "PDF");
 
     if (pdfBuffer && pdfBuffer.length > 1000) {
-      // Compress the DocGen PDF via Foxit PDF Services
+      // Optionally compress the DocGen PDF via PDF Services
       let finalBuffer = pdfBuffer;
       try {
         const uploadedId = await uploadDocument(pdfBuffer, "docgen-brief.pdf");
@@ -76,34 +104,6 @@ export async function POST(
   } catch (docgenError) {
     const docgenMsg = docgenError instanceof Error ? docgenError.message : "DocGen failed";
     console.error(`[PDF] Foxit DocGen failed for job ${jobId}: ${docgenMsg}`);
-    console.log(`[PDF] Falling back to Foxit PDF Services (HTML→PDF)...`);
-  }
-
-  // Strategy 2: Try Foxit PDF Services (HTML → PDF → compress)
-  try {
-    updateJob(jobId, {
-      stage: 6,
-      stageLabel: "Generating PDF via Foxit PDF Services...",
-    });
-
-    const briefHtml = generateBriefHtml(job);
-    const pdfBuffer = await generatePdfFromHtml(briefHtml, hostname);
-
-    briefStore.set(jobId, { buffer: pdfBuffer, format: "pdf" });
-    const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
-
-    updateJob(jobId, {
-      stage: 6,
-      stageLabel: "PDF brief generated via Foxit PDF Services",
-      pdfUrl,
-      status: "complete",
-      completedAt: Date.now(),
-    });
-
-    return NextResponse.json({ success: true, pdfUrl, format: "pdf", method: "foxit-pdfservices" });
-  } catch (pdfError) {
-    const pdfMsg = pdfError instanceof Error ? pdfError.message : "PDF generation failed";
-    console.error(`[PDF] Foxit PDF Services failed for job ${jobId}: ${pdfMsg}`);
     console.log(`[PDF] Falling back to DOCX generation...`);
   }
 
