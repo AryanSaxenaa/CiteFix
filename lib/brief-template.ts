@@ -54,6 +54,14 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .footer { margin-top: 48px; padding-top: 16px; border-top: 2px solid #E74C3C; font-size: 12px; color: #999; text-align: center; }
     .archetype-card { background: #f0f7ff; border: 1px solid #b8daff; border-radius: 6px; padding: 16px; margin: 12px 0; }
     .archetype-freq { font-weight: 700; color: #2980B9; }
+    .toc { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px 24px; margin: 24px 0 32px; }
+    .toc h2 { margin: 0 0 12px; font-size: 18px; color: #333; border: none; padding: 0; }
+    .toc ol { counter-reset: toc-counter; list-style: none; margin: 0; padding: 0; }
+    .toc li { counter-increment: toc-counter; padding: 6px 0; border-bottom: 1px dotted #ddd; }
+    .toc li:last-child { border-bottom: none; }
+    .toc a { color: #2980B9; text-decoration: none; font-size: 14px; }
+    .toc a:hover { text-decoration: underline; }
+    .toc a::before { content: counter(toc-counter) ". "; color: #999; font-weight: 600; }
     @media print { body { padding: 20px; } }
   </style>
 </head>
@@ -82,8 +90,26 @@ export function generateBriefHtml(job: AnalysisJob): string {
     </div>
   </div>
 
+  <!-- Table of Contents -->
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#executive-summary">Executive Summary</a></li>
+      <li><a href="#citation-analysis">Citation Analysis</a></li>
+      <li><a href="#citation-archetypes">Citation Archetypes</a></li>
+      <li><a href="#gap-report">Gap Report</a></li>
+      ${generatedAssets?.schemaMarkup ? '<li><a href="#schema-markup">Schema Markup (JSON-LD)</a></li>' : ''}
+      ${generatedAssets?.rewrittenCopy ? '<li><a href="#rewritten-copy">Rewritten Page Copy</a></li>' : ''}
+      ${generatedAssets?.contentSections && generatedAssets.contentSections.length > 0 ? '<li><a href="#content-sections">Generated Content Sections</a></li>' : ''}
+      ${generatedAssets?.internalLinks?.recommendations && generatedAssets.internalLinks.recommendations.length > 0 ? '<li><a href="#link-recommendations">Internal Link Recommendations</a></li>' : ''}
+      ${job.advancedResearch ? '<li><a href="#research-insights">Advanced Research Insights</a></li>' : ''}
+      ${job.apiTracking ? '<li><a href="#methodology">Analysis Methodology</a></li>' : ''}
+      <li><a href="#checklist">Implementation Checklist</a></li>
+    </ol>
+  </div>
+
   <!-- Executive Summary -->
-  <h2>1. Executive Summary</h2>
+  <h2 id="executive-summary">1. Executive Summary</h2>
   <p>This implementation brief provides deployment-ready assets to improve <strong>${escapeHtml(domain)}</strong>'s visibility in AI-generated answers for the topic "<strong>${escapeHtml(topic)}</strong>". Based on live citation analysis of ${citedUrls.length} top-cited pages, CiteFix identified ${gaps.length} actionable gaps and generated the fixes needed to close them.</p>
 
   <div class="score-box">
@@ -103,7 +129,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   </div>
 
   <!-- Citation Analysis -->
-  <h2>2. Citation Analysis</h2>
+  <h2 id="citation-analysis">2. Citation Analysis</h2>
   <p>The following pages are currently being cited by AI engines for "${escapeHtml(topic)}":</p>
   <ul class="citation-list">
     ${citedUrls
@@ -124,7 +150,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   }
 
   <!-- Citation Archetypes -->
-  <h2>3. Citation Archetypes</h2>
+  <h2 id="citation-archetypes">3. Citation Archetypes</h2>
   <p>Top-cited pages cluster into the following structural patterns:</p>
   ${archetypes
     .map(
@@ -136,7 +162,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
     .join("")}
 
   <!-- Gap Report -->
-  <h2>4. Gap Report</h2>
+  <h2 id="gap-report">4. Gap Report</h2>
   <table class="gap-table">
     <thead>
       <tr><th>Gap</th><th>Impact</th><th>Score Impact</th><th>Difficulty</th><th>Fix Status</th></tr>
@@ -171,7 +197,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   <!-- Generated Schema Markup -->
   ${
     generatedAssets?.schemaMarkup
-      ? `<h2>5. Schema Markup (JSON-LD)</h2>
+      ? `<h2 id="schema-markup">5. Schema Markup (JSON-LD)</h2>
   <p>Copy and paste this into your page's <code>&lt;head&gt;</code> section:</p>
   <div class="code-block">${escapeHtml(generatedAssets.schemaMarkup.jsonLd)}</div>
   <p style="font-size: 12px; color: #666;">Schema types: ${generatedAssets.schemaMarkup.types.join(", ")}</p>`
@@ -181,7 +207,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   <!-- Rewritten Copy -->
   ${
     generatedAssets?.rewrittenCopy
-      ? `<h2>6. Rewritten Page Copy</h2>
+      ? `<h2 id="rewritten-copy">6. Rewritten Page Copy</h2>
   <p style="font-size: 12px; color: #666;">${generatedAssets.rewrittenCopy.wordCount} words — structured to match the winning citation archetype</p>
   <div class="section-content">${escapeHtml(generatedAssets.rewrittenCopy.markdown).replace(/\n/g, "<br>")}</div>`
       : ""
@@ -190,7 +216,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   <!-- Content Sections -->
   ${
     generatedAssets?.contentSections && generatedAssets.contentSections.length > 0
-      ? `<h2>7. Generated Content Sections</h2>
+      ? `<h2 id="content-sections">7. Generated Content Sections</h2>
   ${generatedAssets.contentSections
     .map(
       (s) => `<h3>${escapeHtml(s.title)} (${s.type})</h3>
@@ -203,7 +229,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   <!-- Internal Link Recommendations -->
   ${
     generatedAssets?.internalLinks?.recommendations && generatedAssets.internalLinks.recommendations.length > 0
-      ? `<h2>8. Internal Link Recommendations</h2>
+      ? `<h2 id="link-recommendations">8. Internal Link Recommendations</h2>
   <ul>
   ${generatedAssets.internalLinks.recommendations
     .map(
@@ -219,7 +245,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
 
   <!-- Advanced Research Insights -->
   ${job.advancedResearch ? `
-  <h2>9. Advanced Research Insights</h2>
+  <h2 id="research-insights">9. Advanced Research Insights</h2>
   <p style="font-size: 13px; color: #666;">Deep research powered by You.com Advanced Agent API — uncovering contradictions, knowledge gaps, and content opportunities.</p>
 
   ${job.advancedResearch.contradictions.length > 0 ? `
@@ -243,7 +269,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
 
   <!-- API Transparency -->
   ${job.apiTracking ? `
-  <h2>10. Analysis Methodology</h2>
+  <h2 id="methodology">10. Analysis Methodology</h2>
   <div style="background: #f0f7ff; border: 1px solid #b8daff; border-radius: 6px; padding: 16px; margin: 12px 0;">
     <p style="font-size: 13px; margin-bottom: 8px;"><strong>APIs Used:</strong> ${[...new Set(job.apiTracking.calls.map(c => c.api))].join(', ')}</p>
     <p style="font-size: 13px; margin-bottom: 8px;"><strong>Total API Calls:</strong> ${job.apiTracking.totalCalls}</p>
@@ -253,7 +279,7 @@ export function generateBriefHtml(job: AnalysisJob): string {
   ` : ''}
 
   <!-- Implementation Checklist -->
-  <h2>11. Implementation Checklist</h2>
+  <h2 id="checklist">11. Implementation Checklist</h2>
   <ul class="checklist">
     ${gaps.filter((g) => g.assetGenerated).map((g) => `<li>${escapeHtml(g.name)} — see generated asset above</li>`).join("")}
     <li>Add JSON-LD schema to page &lt;head&gt;</li>

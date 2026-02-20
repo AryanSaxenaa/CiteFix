@@ -1,0 +1,118 @@
+import { AnalysisJob } from "./types";
+
+/**
+ * Build the JSON documentValues for Foxit Document Generation API.
+ * These values map to {{tag}} placeholders in the template.
+ */
+export function buildDocGenValues(job: AnalysisJob): Record<string, unknown> {
+  const score = job.patternResults?.citationProbabilityScore ?? 0;
+  const projected = job.patternResults?.projectedScore ?? 0;
+  const gaps = job.patternResults?.gaps ?? [];
+  const archetypes = job.patternResults?.archetypes ?? [];
+  const citedUrls = job.discoveryResults?.citedUrls ?? [];
+  const assets = job.generatedAssets;
+  const hostname = new URL(job.domain).hostname;
+
+  return {
+    // Header
+    ReportTitle: "CiteFix Implementation Brief",
+    Subtitle: "Answer Engine Optimization — Deployment-Ready Assets",
+    Domain: hostname,
+    Topic: job.topic,
+    GeneratedDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    PagesAnalyzed: `${citedUrls.length} pages`,
+
+    // Scores
+    CurrentScore: score.toString(),
+    ProjectedScore: projected.toString(),
+    ScoreImprovement: `+${projected - score}`,
+    GapCount: gaps.length.toString(),
+
+    // Executive Summary
+    ExecutiveSummary: `This implementation brief provides deployment-ready assets to improve ${hostname}'s visibility in AI-generated answers for the topic "${job.topic}". Based on live citation analysis of ${citedUrls.length} top-cited pages, CiteFix identified ${gaps.length} actionable gaps and generated the fixes needed to close them.`,
+
+    // Citation Status
+    CitationStatus: job.domainAnalysis?.citationStatus === "cited"
+      ? `✓ ${hostname} appears in current AI citations.`
+      : `✗ ${hostname} does not currently appear in AI citations for this topic.`,
+
+    // Tables - Gaps
+    ShowGapTable: gaps.length > 0,
+    Gaps: gaps.map((g) => ({
+      GapName: g.name,
+      GapDescription: g.description,
+      GapImpact: `+${(g.impactScore * 100).toFixed(0)}%`,
+      GapScoreImpact: g.scoreImpact ? `+${g.scoreImpact} pts` : "—",
+      GapDifficulty: g.difficulty,
+      GapStatus: g.assetGenerated ? "✓ Generated" : "—",
+      GapBefore: g.beforeState || "",
+      GapAfter: g.afterState || "",
+    })),
+
+    // Tables - Citations
+    Citations: citedUrls.slice(0, 10).map((u, i) => ({
+      CitationRank: (i + 1).toString(),
+      CitationTitle: u.title || new URL(u.url).hostname,
+      CitationUrl: u.url,
+      CitationCount: `${u.citationCount}×`,
+    })),
+
+    // Tables - Archetypes
+    ShowArchetypes: archetypes.length > 0,
+    Archetypes: archetypes.map((a) => ({
+      ArchetypeName: a.name,
+      ArchetypeFrequency: `${a.frequency}%`,
+      ArchetypeDescription: a.description,
+    })),
+
+    // Generated Assets
+    ShowSchema: !!assets?.schemaMarkup,
+    SchemaCode: assets?.schemaMarkup?.jsonLd || "",
+    SchemaTypes: assets?.schemaMarkup?.types?.join(", ") || "",
+
+    ShowCopy: !!assets?.rewrittenCopy,
+    RewrittenCopy: assets?.rewrittenCopy?.markdown || "",
+    CopyWordCount: assets?.rewrittenCopy?.wordCount?.toString() || "0",
+
+    ShowContentSections: !!(assets?.contentSections && assets.contentSections.length > 0),
+    ContentSections: (assets?.contentSections || []).map((s) => ({
+      SectionTitle: s.title,
+      SectionType: s.type.toUpperCase(),
+      SectionContent: s.markdown,
+    })),
+
+    ShowLinks: !!(assets?.internalLinks?.recommendations && assets.internalLinks.recommendations.length > 0),
+    Links: (assets?.internalLinks?.recommendations || []).map((l) => ({
+      LinkAnchor: l.anchorText,
+      LinkTarget: l.toPage,
+      LinkReason: l.reason,
+    })),
+
+    // Advanced Research
+    ShowResearch: !!job.advancedResearch,
+    Contradictions: (job.advancedResearch?.contradictions || []).map((c) => ({ Item: c })),
+    KnowledgeGaps: (job.advancedResearch?.knowledgeGaps || []).map((g) => ({ Item: g })),
+    ContentOpportunities: (job.advancedResearch?.contentOpportunities || []).map((o) => ({ Item: o })),
+
+    // API Transparency
+    ShowApiTracking: !!job.apiTracking,
+    TotalApiCalls: job.apiTracking?.totalCalls?.toString() || "0",
+    TotalDuration: job.apiTracking ? `${(job.apiTracking.totalDurationMs / 1000).toFixed(1)}s` : "—",
+    ApisUsed: job.apiTracking ? [...new Set(job.apiTracking.calls.map((c) => c.api))].join(", ") : "",
+    QueryVariants: (job.discoveryResults?.queryVariants || []).join(" • "),
+
+    // Checklist
+    ChecklistItems: [
+      ...gaps.filter((g) => g.assetGenerated).map((g) => ({ Item: `${g.name} — see generated asset above` })),
+      { Item: "Add JSON-LD schema to page <head>" },
+      { Item: "Replace page content with rewritten copy" },
+      { Item: "Add FAQ section to page body" },
+      { Item: "Update internal link structure" },
+      { Item: "Verify schema with Schema.org validator" },
+      { Item: "Re-run CiteFix analysis to verify improvement" },
+    ],
+
+    // Footer
+    FooterText: "Generated by CiteFix — Powered by You.com APIs & Foxit PDF | DeveloperWeek 2026",
+  };
+}

@@ -12,6 +12,11 @@ import {
   Zap,
   Loader2,
   Lightbulb,
+  Shield,
+  Map,
+  FileText,
+  Newspaper,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -25,6 +30,18 @@ const COUNTRIES = [
   { code: "CA", label: "Canada" },
 ];
 
+interface DnsValidation {
+  valid: boolean;
+  reachable: boolean;
+  hostname: string;
+  sitemapFound: boolean;
+  sitemapUrl?: string;
+  robotsTxtFound: boolean;
+  pageCount?: number;
+  dnsResolveMs?: number;
+  error?: string;
+}
+
 export default function AnalyzePage() {
   const router = useRouter();
   const [domain, setDomain] = useState("");
@@ -32,10 +49,16 @@ export default function AnalyzePage() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [depth, setDepth] = useState<"quick" | "standard" | "deep">("standard");
   const [country, setCountry] = useState("US");
+  const [sourceTypes, setSourceTypes] = useState<("web" | "news")[]>(["web"]);
   const [competitors, setCompetitors] = useState(["", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [domainValid, setDomainValid] = useState<boolean | null>(null);
+
+  // DNS validation state
+  const [dnsResult, setDnsResult] = useState<DnsValidation | null>(null);
+  const [validatingDns, setValidatingDns] = useState(false);
+  const dnsDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Topic suggestions state
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -43,19 +66,59 @@ export default function AnalyzePage() {
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
   const suggestDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const validateDomain = (value: string) => {
+  // DNS validation — real-time
+  const validateDns = useCallback(async (domainValue: string) => {
+    if (domainValue.trim().length < 3) {
+      setDnsResult(null);
+      return;
+    }
+    setValidatingDns(true);
+    try {
+      const res = await fetch("/api/analyze/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain: domainValue.trim() }),
+      });
+      const data: DnsValidation = await res.json();
+      setDnsResult(data);
+      setDomainValid(data.valid && data.reachable);
+    } catch {
+      setDnsResult(null);
+    } finally {
+      setValidatingDns(false);
+    }
+  }, []);
+
+  const handleDomainChange = (value: string) => {
     setDomain(value);
+    // Basic instant validation
     if (!value.trim()) {
       setDomainValid(null);
+      setDnsResult(null);
       return;
     }
     try {
       const url = value.startsWith("http") ? value : `https://${value}`;
       new URL(url);
-      setDomainValid(true);
+      setDomainValid(true); // optimistic
     } catch {
       setDomainValid(false);
+      setDnsResult(null);
+      return;
     }
+    // Debounced DNS check
+    if (dnsDebounce.current) clearTimeout(dnsDebounce.current);
+    dnsDebounce.current = setTimeout(() => validateDns(value), 600);
+  };
+
+  const toggleSourceType = (type: "web" | "news") => {
+    setSourceTypes((prev) => {
+      if (prev.includes(type)) {
+        if (prev.length === 1) return prev; // Must have at least one
+        return prev.filter((t) => t !== type);
+      }
+      return [...prev, type];
+    });
   };
 
   const fetchSuggestions = useCallback(async (topicValue: string) => {
@@ -122,7 +185,7 @@ export default function AnalyzePage() {
           config: {
             depth,
             country,
-            sourceTypes: ["web"],
+            sourceTypes,
             outputFormat: "both",
             competitors: competitors.filter((c) => c.trim()),
           },
@@ -198,13 +261,15 @@ export default function AnalyzePage() {
               <input
                 type="text"
                 value={domain}
-                onChange={(e) => validateDomain(e.target.value)}
+                onChange={(e) => handleDomainChange(e.target.value)}
                 placeholder="e.g. nike.com"
                 className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#E74C3C]/50 focus:ring-1 focus:ring-[#E74C3C]/20 transition-all"
               />
-              {domainValid !== null && (
+              {(domainValid !== null || validatingDns) && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {domainValid ? (
+                  {validatingDns ? (
+                    <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+                  ) : domainValid ? (
                     <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
                       <span className="text-green-400 text-xs">✓</span>
                     </div>
@@ -216,6 +281,35 @@ export default function AnalyzePage() {
                 </div>
               )}
             </div>
+
+            {/* DNS Validation Details */}
+            {dnsResult && (
+              <div className="mt-3 space-y-2">
+                {dnsResult.reachable ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20 text-[11px] text-green-400">
+                      <Shield className="w-3 h-3" /> Reachable
+                      {dnsResult.dnsResolveMs ? ` (${dnsResult.dnsResolveMs}ms)` : ""}
+                    </span>
+                    {dnsResult.robotsTxtFound && (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-400">
+                        <FileText className="w-3 h-3" /> robots.txt
+                      </span>
+                    )}
+                    {dnsResult.sitemapFound && (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-400">
+                        <Map className="w-3 h-3" /> Sitemap
+                        {dnsResult.pageCount ? ` (${dnsResult.pageCount.toLocaleString()} pages)` : ""}
+                      </span>
+                    )}
+                  </div>
+                ) : dnsResult.error ? (
+                  <div className="text-xs text-red-400 bg-red-500/5 border border-red-500/10 rounded-lg px-3 py-2">
+                    {dnsResult.error}
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Topic Input */}
@@ -310,6 +404,37 @@ export default function AnalyzePage() {
                 </div>
               </div>
 
+              {/* Source Types */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Source Types
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => toggleSourceType("web")}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                      sourceTypes.includes("web")
+                        ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                        : "border-white/10 text-gray-500 hover:border-white/20"
+                    }`}
+                  >
+                    <Globe className="w-4 h-4" />
+                    <span className="text-sm font-medium">Web</span>
+                  </button>
+                  <button
+                    onClick={() => toggleSourceType("news")}
+                    className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
+                      sourceTypes.includes("news")
+                        ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                        : "border-white/10 text-gray-500 hover:border-white/20"
+                    }`}
+                  >
+                    <Newspaper className="w-4 h-4" />
+                    <span className="text-sm font-medium">News</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Country */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -331,7 +456,8 @@ export default function AnalyzePage() {
               {/* Competitors */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Competitor Domains (Optional)
+                  <Users className="w-4 h-4 inline mr-2" />
+                  Competitor Domains (Optional — up to 3)
                 </label>
                 <div className="space-y-2">
                   {competitors.map((comp, i) => (
@@ -344,13 +470,13 @@ export default function AnalyzePage() {
                         updated[i] = e.target.value;
                         setCompetitors(updated);
                       }}
-                      placeholder={`Competitor ${i + 1}`}
+                      placeholder={`Competitor ${i + 1} (e.g. ${["competitor.com", "rival.io", "alternative.co"][i]})`}
                       className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder-gray-700 focus:outline-none focus:border-white/20"
                     />
                   ))}
                 </div>
                 <p className="text-xs text-gray-600 mt-2">
-                  Leave empty to auto-detect from search results
+                  Leave empty to auto-detect top competitors from You.com search results
                 </p>
               </div>
             </div>

@@ -184,28 +184,46 @@ export default function ResultsPage() {
               Citation Map
             </h2>
             <div className="bg-[#0F0F0F] border border-white/10 rounded-xl overflow-hidden">
-              {citedUrls.slice(0, 10).map((url, i) => (
+              {citedUrls.slice(0, 10).map((url, i) => {
+                let hostname = "";
+                try { hostname = new URL(url.url).hostname; } catch { hostname = "unknown"; }
+                return (
                 <div key={i}>
                   <button
                     onClick={() => setExpandedCitation(expandedCitation === i ? null : i)}
                     className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors text-left"
                   >
-                    <div className="w-6 h-6 rounded bg-[#1a1a1a] flex items-center justify-center text-xs text-gray-500 font-mono shrink-0">
-                      {i + 1}
-                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://www.google.com/s2/favicons?domain=${hostname}&sz=32`}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="rounded shrink-0"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-gray-300 truncate">
-                        {url.title || new URL(url.url).hostname}
+                        {url.title || hostname}
                       </div>
-                      <div className="text-xs text-gray-600 truncate">{url.url}</div>
+                      <div className="text-xs text-gray-600 truncate">{hostname}</div>
                     </div>
-                    <div className="text-xs text-[#E74C3C] font-mono shrink-0">
-                      {url.citationCount}×
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="text-xs text-[#E74C3C] font-mono">
+                        {url.citationCount}×
+                      </div>
+                      <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#E74C3C] rounded-full"
+                          style={{ width: `${Math.min(100, (url.citationCount / Math.max(...citedUrls.map(u => u.citationCount))) * 100)}%` }}
+                        />
+                      </div>
                     </div>
                   </button>
                   {expandedCitation === i && (
                     <div className="px-4 pb-3 text-xs space-y-1 border-b border-white/5">
                       <div className="text-gray-500">{url.description}</div>
+                      <div className="text-gray-600 font-mono truncate">{url.url}</div>
                       <a
                         href={url.url}
                         target="_blank"
@@ -217,7 +235,8 @@ export default function ResultsPage() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
 
               {/* User domain status */}
               <div className="px-4 py-3 border-t border-white/10 bg-white/[0.02]">
@@ -440,25 +459,84 @@ export default function ResultsPage() {
               {activeTab === "links" && (
                 <div className="p-4">
                   {assets?.internalLinks?.recommendations && assets.internalLinks.recommendations.length > 0 ? (
-                    <div className="space-y-3">
-                      {assets.internalLinks.recommendations.map((link, i) => (
-                        <div key={i} className="border border-white/5 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono">
-                              Link {i + 1}
-                            </span>
-                          </div>
-                          <div className="text-sm text-white mb-1">
-                            &quot;{link.anchorText}&quot;
-                          </div>
-                          <div className="text-xs text-blue-400 mb-1 truncate">
-                            → {link.toPage}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {link.reason}
-                          </div>
+                    <div className="space-y-4">
+                      {/* Visual Sitemap Diagram */}
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Globe className="w-4 h-4 text-purple-400" />
+                          <span className="text-xs text-gray-400 font-medium">Link Architecture</span>
                         </div>
-                      ))}
+                        <div className="bg-[#1a1a1a] rounded-lg p-4 overflow-x-auto">
+                          <svg
+                            viewBox={`0 0 360 ${Math.max(200, 60 + assets.internalLinks.recommendations.length * 60)}`}
+                            className="w-full"
+                            style={{ minHeight: 200, maxHeight: 400 }}
+                          >
+                            {/* Central hub node — the user's domain */}
+                            <circle cx="80" cy={30 + (assets.internalLinks.recommendations.length * 60) / 2} r="24" fill="#E74C3C" opacity="0.2" stroke="#E74C3C" strokeWidth="2" />
+                            <text x="80" y={34 + (assets.internalLinks.recommendations.length * 60) / 2} textAnchor="middle" fill="#E74C3C" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                              {(() => { try { return new URL(data.domain || "").hostname.replace("www.", "").slice(0, 12); } catch { return "your site"; } })()}
+                            </text>
+
+                            {/* Link nodes + connections */}
+                            {assets.internalLinks!.recommendations.map((link, i) => {
+                              const centerY = 30 + (assets.internalLinks!.recommendations.length * 60) / 2;
+                              const targetY = 40 + i * 60;
+                              const targetX = 280;
+                              return (
+                                <g key={i}>
+                                  {/* Curved connection line */}
+                                  <path
+                                    d={`M 104 ${centerY} C 180 ${centerY}, 200 ${targetY}, ${targetX - 50} ${targetY}`}
+                                    fill="none"
+                                    stroke="#6C5CE7"
+                                    strokeWidth="1.5"
+                                    opacity="0.5"
+                                    strokeDasharray="4 2"
+                                  />
+                                  {/* Arrow */}
+                                  <polygon
+                                    points={`${targetX - 52},${targetY - 4} ${targetX - 44},${targetY} ${targetX - 52},${targetY + 4}`}
+                                    fill="#6C5CE7"
+                                    opacity="0.7"
+                                  />
+                                  {/* Target page node */}
+                                  <rect x={targetX - 40} y={targetY - 16} width="100" height="32" rx="6" fill="#6C5CE7" opacity="0.15" stroke="#6C5CE7" strokeWidth="1" />
+                                  <text x={targetX + 10} y={targetY + 4} textAnchor="middle" fill="#a29bfe" fontSize="8" fontFamily="monospace">
+                                    {link.toPage.replace(/^https?:\/\//, "").slice(0, 14)}
+                                  </text>
+                                  {/* Anchor text label on the line */}
+                                  <text x="170" y={Math.round((centerY + targetY) / 2) - 4} textAnchor="middle" fill="#636e72" fontSize="7" fontFamily="sans-serif">
+                                    &quot;{link.anchorText.slice(0, 18)}&quot;
+                                  </text>
+                                </g>
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Link list */}
+                      <div className="space-y-3">
+                        {assets.internalLinks.recommendations.map((link, i) => (
+                          <div key={i} className="border border-white/5 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono">
+                                Link {i + 1}
+                              </span>
+                            </div>
+                            <div className="text-sm text-white mb-1">
+                              &quot;{link.anchorText}&quot;
+                            </div>
+                            <div className="text-xs text-blue-400 mb-1 truncate">
+                              → {link.toPage}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {link.reason}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <p className="text-sm text-gray-600 text-center py-8">
