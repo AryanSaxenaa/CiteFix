@@ -187,6 +187,23 @@ export function generateBriefHtml(job: AnalysisJob): string {
       : ""
   }
 
+  <!-- Internal Link Recommendations -->
+  ${
+    generatedAssets?.internalLinks?.recommendations && generatedAssets.internalLinks.recommendations.length > 0
+      ? `<h2>8. Internal Link Recommendations</h2>
+  <ul>
+  ${generatedAssets.internalLinks.recommendations
+    .map(
+      (link) => `<li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+        <strong>"${escapeHtml(link.anchorText)}"</strong> → <span style="color: #2980B9;">${escapeHtml(link.toPage)}</span>
+        <br><span style="font-size: 12px; color: #666;">${escapeHtml(link.reason)}</span>
+      </li>`
+    )
+    .join("")}
+  </ul>`
+      : ""
+  }
+
   <!-- Implementation Checklist -->
   <h2>8. Implementation Checklist</h2>
   <ul class="checklist">

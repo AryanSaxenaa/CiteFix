@@ -297,6 +297,7 @@ export default function ResultsPage() {
                 { id: "schema" as const, label: "Schema" },
                 { id: "copy" as const, label: "Copy" },
                 { id: "sections" as const, label: "Sections" },
+                { id: "links" as const, label: "Links" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -400,6 +401,38 @@ export default function ResultsPage() {
                   ) : (
                     <p className="text-sm text-gray-600 text-center py-8">
                       No content sections generated
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Links Tab */}
+              {activeTab === "links" && (
+                <div className="p-4">
+                  {assets?.internalLinks?.recommendations && assets.internalLinks.recommendations.length > 0 ? (
+                    <div className="space-y-3">
+                      {assets.internalLinks.recommendations.map((link, i) => (
+                        <div key={i} className="border border-white/5 rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono">
+                              Link {i + 1}
+                            </span>
+                          </div>
+                          <div className="text-sm text-white mb-1">
+                            &quot;{link.anchorText}&quot;
+                          </div>
+                          <div className="text-xs text-blue-400 mb-1 truncate">
+                            → {link.toPage}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {link.reason}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-600 text-center py-8">
+                      No link recommendations generated
                     </p>
                   )}
                 </div>

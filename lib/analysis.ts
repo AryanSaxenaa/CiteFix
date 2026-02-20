@@ -222,7 +222,7 @@ function identifyGaps(
       description: `Top-cited pages have an average of ${Math.round(avgLinks)} internal links. Your page has ${domain.page.internalLinks.length}.`,
       impactScore: 0.18,
       difficulty: "medium",
-      assetGenerated: false,
+      assetGenerated: true,
       category: "structure",
     });
   }

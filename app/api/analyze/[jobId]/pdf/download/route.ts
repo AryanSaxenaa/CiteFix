@@ -13,29 +13,42 @@ export async function GET(
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  // Try to get PDF from the pdf route's store
-  try {
-    const { getPdfBuffer } = await import("../route");
-    const pdfBuffer = getPdfBuffer(jobId);
+  const hostname = new URL(job.domain).hostname;
 
-    if (pdfBuffer) {
-      return new NextResponse(new Uint8Array(pdfBuffer), {
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="CiteFix-Brief-${new URL(job.domain).hostname}.pdf"`,
-        },
-      });
+  // Try to get the generated brief (PDF or DOCX) from the store
+  try {
+    const { getBriefData } = await import("../route");
+    const briefData = getBriefData(jobId);
+
+    if (briefData) {
+      if (briefData.format === "pdf") {
+        return new NextResponse(new Uint8Array(briefData.buffer), {
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.pdf"`,
+          },
+        });
+      }
+
+      if (briefData.format === "docx") {
+        return new NextResponse(new Uint8Array(briefData.buffer), {
+          headers: {
+            "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.docx"`,
+          },
+        });
+      }
     }
   } catch {
-    // PDF buffer not available
+    // Brief buffer not available, fall through to HTML fallback
   }
 
-  // Fallback: serve the HTML brief directly
+  // Last resort fallback: serve the HTML brief directly
   const html = generateBriefHtml(job);
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html",
-      "Content-Disposition": `attachment; filename="CiteFix-Brief-${new URL(job.domain).hostname}.html"`,
+      "Content-Disposition": `attachment; filename="CiteFix-Brief-${hostname}.html"`,
     },
   });
 }

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getJob, updateJob } from "@/lib/store";
 import { generatePdfFromHtml } from "@/lib/foxit";
 import { generateBriefHtml } from "@/lib/brief-template";
+import { generateBriefDocx } from "@/lib/docx-generator";
 
-// In-memory PDF store for download
-const pdfStore = new Map<string, Buffer>();
+// In-memory store for download — stores buffer + format
+const briefStore = new Map<string, { buffer: Buffer; format: "pdf" | "docx" }>();
 
-export function getPdfBuffer(jobId: string): Buffer | undefined {
-  return pdfStore.get(jobId);
+export function getBriefData(jobId: string): { buffer: Buffer; format: "pdf" | "docx" } | undefined {
+  return briefStore.get(jobId);
 }
 
 export async function POST(
@@ -28,6 +29,9 @@ export async function POST(
     );
   }
 
+  const hostname = new URL(job.domain).hostname;
+
+  // Try Foxit PDF first
   try {
     updateJob(jobId, {
       stage: 5,
@@ -35,12 +39,9 @@ export async function POST(
     });
 
     const briefHtml = generateBriefHtml(job);
-    const hostname = new URL(job.domain).hostname;
-
     const pdfBuffer = await generatePdfFromHtml(briefHtml, hostname);
 
-    // Store PDF buffer for download
-    pdfStore.set(jobId, pdfBuffer);
+    briefStore.set(jobId, { buffer: pdfBuffer, format: "pdf" });
 
     const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
 
@@ -52,18 +53,47 @@ export async function POST(
       completedAt: Date.now(),
     });
 
-    return NextResponse.json({ success: true, pdfUrl });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "PDF generation failed";
-    console.error(`[PDF] Foxit PDF generation failed for job ${jobId}:`, message);
-    // Still mark as complete — PDF is a bonus, results are the core value
+    return NextResponse.json({ success: true, pdfUrl, format: "pdf" });
+  } catch (pdfError) {
+    const pdfMsg = pdfError instanceof Error ? pdfError.message : "PDF generation failed";
+    console.error(`[PDF] Foxit PDF failed for job ${jobId}: ${pdfMsg}`);
+    console.log(`[PDF] Falling back to DOCX generation...`);
+  }
+
+  // Fallback: generate DOCX
+  try {
     updateJob(jobId, {
       stage: 5,
-      stageLabel: "Analysis complete (PDF generation encountered an issue)",
+      stageLabel: "Generating DOCX implementation brief...",
+    });
+
+    const docxBuffer = await generateBriefDocx(job);
+
+    briefStore.set(jobId, { buffer: docxBuffer, format: "docx" });
+
+    const pdfUrl = `/api/analyze/${jobId}/pdf/download`;
+
+    updateJob(jobId, {
+      stage: 5,
+      stageLabel: "Implementation brief generated (DOCX)",
+      pdfUrl,
       status: "complete",
       completedAt: Date.now(),
-      error: `PDF: ${message}`,
     });
-    return NextResponse.json({ error: message, partial: true }, { status: 500 });
+
+    return NextResponse.json({ success: true, pdfUrl, format: "docx" });
+  } catch (docxError) {
+    const docxMsg = docxError instanceof Error ? docxError.message : "DOCX generation failed";
+    console.error(`[PDF] DOCX fallback also failed for job ${jobId}: ${docxMsg}`);
+
+    updateJob(jobId, {
+      stage: 5,
+      stageLabel: "Analysis complete (brief generation encountered an issue)",
+      status: "complete",
+      completedAt: Date.now(),
+      error: `Brief generation: ${docxMsg}`,
+    });
+
+    return NextResponse.json({ error: docxMsg, partial: true }, { status: 500 });
   }
 }

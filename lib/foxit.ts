@@ -9,13 +9,16 @@ function getCredentials(): { clientId: string; clientSecret: string } {
   return { clientId, clientSecret };
 }
 
-function authHeaders(): Record<string, string> {
+function authHeaders(includeBasicAuth = false): Record<string, string> {
   const { clientId, clientSecret } = getCredentials();
-  return {
+  const headers: Record<string, string> = {
     client_id: clientId,
     client_secret: clientSecret,
-    Authorization: "Basic Og==",
   };
+  if (includeBasicAuth) {
+    headers["Authorization"] = "Basic Og==";
+  }
+  return headers;
 }
 
 // Upload a file (HTML or DOCX) to Foxit
@@ -31,7 +34,7 @@ export async function uploadDocument(
     `${FOXIT_BASE}/pdf-services/api/documents/upload`,
     {
       method: "POST",
-      headers: authHeaders(),
+      headers: authHeaders(false),
       body: formData,
     }
   );
@@ -59,7 +62,7 @@ export async function htmlToPdf(documentId: string): Promise<string> {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: {
-        ...authHeaders(),
+        ...authHeaders(true),
         "Content-Type": "application/json",
       },
     });
@@ -89,7 +92,7 @@ export async function getTaskStatus(
   const res = await fetch(
     `${FOXIT_BASE}/pdf-services/api/tasks/${taskId}`,
     {
-      headers: authHeaders(),
+      headers: authHeaders(true),
     }
   );
 
@@ -132,7 +135,7 @@ export async function downloadDocument(
   const res = await fetch(
     `${FOXIT_BASE}/pdf-services/api/documents/${documentId}/download${params}`,
     {
-      headers: authHeaders(),
+      headers: authHeaders(false),
     }
   );
 
@@ -154,7 +157,7 @@ export async function addWatermark(
     {
       method: "POST",
       headers: {
-        ...authHeaders(),
+        ...authHeaders(true),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -183,7 +186,7 @@ export async function compressPdf(documentId: string): Promise<string> {
     {
       method: "POST",
       headers: {
-        ...authHeaders(),
+        ...authHeaders(true),
         "Content-Type": "application/json",
       },
     }
@@ -243,7 +246,7 @@ export async function generateDocument(
     {
       method: "POST",
       headers: {
-        ...authHeaders(),
+        ...authHeaders(false),
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

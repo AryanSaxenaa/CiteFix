@@ -49,7 +49,10 @@ export default function BriefPage() {
 
       const blob = await res.blob();
       const contentType = res.headers.get("content-type") || "";
-      const ext = contentType.includes("pdf") ? "pdf" : "html";
+
+      let ext = "html";
+      if (contentType.includes("pdf")) ext = "pdf";
+      else if (contentType.includes("wordprocessingml") || contentType.includes("docx")) ext = "docx";
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
