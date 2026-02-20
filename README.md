@@ -262,8 +262,8 @@ If both Foxit services are unavailable, Scoutlytics generates a DOCX file locall
 ### Installation
 
 ```bash
-git clone https://github.com/AryanSaxenaa/CiteFix.git
-cd CiteFix/citefix-web
+git clone https://github.com/AryanSaxenaa/Scoutlytics.git
+cd Scoutlytics/citefix-web
 npm install
 ```
 
