@@ -383,6 +383,17 @@ export default function DashboardPage() {
                         <span>·</span>
                         <span>{job.depth} · {job.country}</span>
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const params = new URLSearchParams({ domain: job.domain, topic: job.topic });
+                          window.location.href = `/analyze?rerun=true&${params.toString()}`;
+                        }}
+                        className="flex items-center gap-1.5 text-[10px] text-[#E74C3C] hover:text-red-300 transition-colors bg-[#E74C3C]/5 hover:bg-[#E74C3C]/10 px-3 py-1.5 rounded-lg border border-[#E74C3C]/20"
+                      >
+                        <RefreshCw className="w-3 h-3" /> Re-run
+                      </button>
                     </div>
                   )}
                 </Link>

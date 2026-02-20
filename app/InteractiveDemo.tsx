@@ -25,7 +25,25 @@ export default function InteractiveDemo() {
   const [lines, setLines] = useState<DemoLine[]>([]);
   const [result, setResult] = useState<DemoResult | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [showLive, setShowLive] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Pre-run sample data visible immediately
+  const preRunLines: DemoLine[] = [
+    { icon: "check", text: "Querying You.com Search API...", detail: "Done (0.4s)" },
+    { icon: "check", text: "Extracting content from 10 cited pages...", detail: "Done (2.1s)" },
+    { icon: "check", text: "Analyzing domain: nike.com...", detail: "Done (0.8s)" },
+    { icon: "check", text: "Running citation pattern analysis...", detail: "Done (1.5s)" },
+    { icon: "check", text: "Generating implementation assets...", detail: "Done (3.2s)" },
+  ];
+  const preRunResult: DemoResult = {
+    score: 34,
+    gaps: 5,
+    assets: 4,
+    cited: 12,
+    found: false,
+    topGap: "Missing FAQPage JSON-LD Schema",
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -172,7 +190,9 @@ export default function InteractiveDemo() {
         </span>
         <h2 className="text-4xl mt-2 font-serif">Try the engine right now</h2>
         <p className="text-gray-400 mt-4 max-w-lg mx-auto">
-          Enter any domain and topic — watch Scoutlytics run a real analysis in real time. No signup needed.
+          {showLive
+            ? "Enter any domain and topic — watch Scoutlytics run a real analysis in real time."
+            : "Here\u2019s a sample analysis for nike.com. Try it yourself with your own domain below."}
         </p>
       </div>
 
@@ -184,121 +204,184 @@ export default function InteractiveDemo() {
             <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
             <div className="w-3 h-3 rounded-full bg-green-500"></div>
           </div>
-          <div className="text-xs text-gray-500 font-mono">scoutlytics — live demo</div>
+          <div className="text-xs text-gray-500 font-mono">
+            {showLive ? "scoutlytics — live demo" : "scoutlytics — sample analysis"}
+          </div>
           <div className="w-10"></div>
         </div>
 
-        {/* Input area */}
-        <div className="p-6 border-b border-white/5 bg-[#111]">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <label className="text-[10px] text-gray-600 font-mono uppercase mb-1 block">Domain</label>
-              <input
-                type="text"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                placeholder="yoursite.com"
-                disabled={running}
-                className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-[10px] text-gray-600 font-mono uppercase mb-1 block">Topic</label>
-              <input
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="best project management tools"
-                disabled={running}
-                className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={runDemo}
-                disabled={running || !domain.trim() || !topic.trim()}
-                className="bg-[#E74C3C] hover:bg-red-600 text-white px-6 py-2 rounded text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
-              >
-                {running ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running...
-                  </>
-                ) : (
-                  "Run Analysis"
-                )}
-              </button>
+        {/* Input area — only shown in live mode */}
+        {showLive && (
+          <div className="p-6 border-b border-white/5 bg-[#111]">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-1">
+                <label className="text-[10px] text-gray-600 font-mono uppercase mb-1 block">Domain</label>
+                <input
+                  type="text"
+                  value={domain}
+                  onChange={(e) => setDomain(e.target.value)}
+                  placeholder="yoursite.com"
+                  disabled={running}
+                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-[10px] text-gray-600 font-mono uppercase mb-1 block">Topic</label>
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="best project management tools"
+                  disabled={running}
+                  className="w-full bg-[#0c0c0c] border border-white/10 rounded px-3 py-2 text-sm text-white placeholder-gray-700 font-mono focus:outline-none focus:border-[#E74C3C]/50 disabled:opacity-50"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={runDemo}
+                  disabled={running || !domain.trim() || !topic.trim()}
+                  className="bg-[#E74C3C] hover:bg-red-600 text-white px-6 py-2 rounded text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                >
+                  {running ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Running...
+                    </>
+                  ) : (
+                    "Run Analysis"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Terminal output */}
         <div ref={scrollRef} className="p-6 font-mono text-sm h-[320px] overflow-y-auto">
-          {lines.length === 0 && !running && (
-            <div className="text-gray-600 text-center py-12">
-              <p className="mb-1">// Enter a domain and topic above, then click &quot;Run Analysis&quot;</p>
-              <p className="text-gray-700">// Full 5-stage pipeline runs in ~30 seconds</p>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            {lines.map((line, i) => (
-              <div key={i} className="flex gap-2 items-start">
-                {line.icon === "spinner" && <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin mt-0.5 shrink-0" />}
-                {line.icon === "check" && <span className="text-green-500 shrink-0">✔</span>}
-                {line.icon === "error" && <span className="text-red-500 shrink-0">✖</span>}
-                <span className="text-gray-300">{line.text}</span>
-                {line.detail && <span className="text-gray-600">{line.detail}</span>}
+          {/* Pre-run sample (default state) */}
+          {!showLive && (
+            <>
+              <div className="text-gray-600 text-[10px] uppercase tracking-wider mb-3">
+                Sample: nike.com — &quot;best running shoes&quot;
               </div>
-            ))}
-          </div>
-
-          {/* Results panel */}
-          {result && (
-            <div className="mt-4 p-4 border border-white/10 bg-white/5 rounded">
-              <div className="text-[#E74C3C] font-bold mb-3">
-                ANALYSIS COMPLETE — SCORE: {result.score}/100
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-                <div className="text-center">
-                  <div className={`text-xl font-bold ${result.score >= 70 ? "text-green-400" : result.score >= 40 ? "text-yellow-400" : "text-red-400"}`}>
-                    {result.score}
+              <div className="space-y-2">
+                {preRunLines.map((line, i) => (
+                  <div key={i} className="flex gap-2 items-start">
+                    {line.icon === "check" && <span className="text-green-500 shrink-0">✔</span>}
+                    <span className="text-gray-300">{line.text}</span>
+                    {line.detail && <span className="text-gray-600">{line.detail}</span>}
                   </div>
-                  <div className="text-[9px] text-gray-600 uppercase">Score</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-red-400">{result.gaps}</div>
-                  <div className="text-[9px] text-gray-600 uppercase">Gaps Found</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-blue-400">{result.cited}</div>
-                  <div className="text-[9px] text-gray-600 uppercase">URLs Cited</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-green-400">{result.assets}</div>
-                  <div className="text-[9px] text-gray-600 uppercase">Assets</div>
-                </div>
+                ))}
               </div>
-              {result.topGap && (
+
+              <div className="mt-4 p-4 border border-white/10 bg-white/5 rounded">
+                <div className="text-[#E74C3C] font-bold mb-3">
+                  ANALYSIS COMPLETE — SCORE: {preRunResult.score}/100
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-red-400">{preRunResult.score}</div>
+                    <div className="text-[9px] text-gray-600 uppercase">Score</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-red-400">{preRunResult.gaps}</div>
+                    <div className="text-[9px] text-gray-600 uppercase">Gaps Found</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-blue-400">{preRunResult.cited}</div>
+                    <div className="text-[9px] text-gray-600 uppercase">URLs Cited</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-green-400">{preRunResult.assets}</div>
+                    <div className="text-[9px] text-gray-600 uppercase">Assets</div>
+                  </div>
+                </div>
                 <div className="text-gray-400 text-xs mb-3">
-                  Top gap: <span className="text-white">{result.topGap}</span>
+                  Top gap: <span className="text-white">{preRunResult.topGap}</span>
                 </div>
-              )}
-              <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-                {result.found ? (
-                  <span className="text-green-400">✔ Your domain was found in AI results</span>
-                ) : (
-                  <span className="text-yellow-400">⚠ Your domain was not detected in AI citations</span>
-                )}
-              </div>
-              {jobId && (
-                <a
-                  href={`/analyze/${jobId}/results`}
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                  <span className="text-yellow-400">⚠ Domain was not detected in AI citations</span>
+                </div>
+                <button
+                  onClick={() => setShowLive(true)}
                   className="inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
                 >
-                  View Full Results →
-                </a>
+                  Try Your Own Domain →
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Live mode terminal */}
+          {showLive && (
+            <>
+              {lines.length === 0 && !running && (
+                <div className="text-gray-600 text-center py-12">
+                  <p className="mb-1">// Enter a domain and topic above, then click &quot;Run Analysis&quot;</p>
+                  <p className="text-gray-700">// Full 5-stage pipeline runs in ~30 seconds</p>
+                </div>
               )}
-            </div>
+
+              <div className="space-y-2">
+                {lines.map((line, i) => (
+                  <div key={i} className="flex gap-2 items-start">
+                    {line.icon === "spinner" && <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin mt-0.5 shrink-0" />}
+                    {line.icon === "check" && <span className="text-green-500 shrink-0">✔</span>}
+                    {line.icon === "error" && <span className="text-red-500 shrink-0">✖</span>}
+                    <span className="text-gray-300">{line.text}</span>
+                    {line.detail && <span className="text-gray-600">{line.detail}</span>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Results panel */}
+              {result && (
+                <div className="mt-4 p-4 border border-white/10 bg-white/5 rounded">
+                  <div className="text-[#E74C3C] font-bold mb-3">
+                    ANALYSIS COMPLETE — SCORE: {result.score}/100
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+                    <div className="text-center">
+                      <div className={`text-xl font-bold ${result.score >= 70 ? "text-green-400" : result.score >= 40 ? "text-yellow-400" : "text-red-400"}`}>
+                        {result.score}
+                      </div>
+                      <div className="text-[9px] text-gray-600 uppercase">Score</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-red-400">{result.gaps}</div>
+                      <div className="text-[9px] text-gray-600 uppercase">Gaps Found</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-blue-400">{result.cited}</div>
+                      <div className="text-[9px] text-gray-600 uppercase">URLs Cited</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-400">{result.assets}</div>
+                      <div className="text-[9px] text-gray-600 uppercase">Assets</div>
+                    </div>
+                  </div>
+                  {result.topGap && (
+                    <div className="text-gray-400 text-xs mb-3">
+                      Top gap: <span className="text-white">{result.topGap}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                    {result.found ? (
+                      <span className="text-green-400">✔ Your domain was found in AI results</span>
+                    ) : (
+                      <span className="text-yellow-400">⚠ Your domain was not detected in AI citations</span>
+                    )}
+                  </div>
+                  {jobId && (
+                    <a
+                      href={`/analyze/${jobId}/results`}
+                      className="inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors font-bold"
+                    >
+                      View Full Results →
+                    </a>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

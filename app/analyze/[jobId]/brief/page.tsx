@@ -17,6 +17,17 @@ import {
 import Link from "next/link";
 import type { AnalysisStatusResponse } from "@/lib/types";
 
+function estimatePageCount(data: AnalysisStatusResponse): number {
+  let pages = 3; // cover + exec summary + gap report
+  if (data.generatedAssets?.schemaMarkup) pages += 2;
+  if (data.generatedAssets?.rewrittenCopy) pages += Math.ceil((data.generatedAssets.rewrittenCopy.wordCount || 500) / 350);
+  if (data.generatedAssets?.contentSections) pages += data.generatedAssets.contentSections.length;
+  if (data.generatedAssets?.internalLinks) pages += 1;
+  if (data.discoveryResults?.citedUrls) pages += Math.ceil((data.discoveryResults.citedUrls.length || 0) / 5);
+  pages += 1; // checklist
+  return Math.max(pages, 6);
+}
+
 export default function BriefPage() {
   const params = useParams();
   const jobId = params.jobId as string;
@@ -186,6 +197,9 @@ export default function BriefPage() {
           <h1 className="text-3xl font-serif font-bold mb-2">Implementation Brief</h1>
           <p className="text-gray-500 text-sm">
             {data.domain} — Score: {score}/100
+          </p>
+          <p className="text-gray-600 text-xs mt-2 font-mono">
+            Your brief is approximately {estimatePageCount(data)} pages
           </p>
         </div>
 

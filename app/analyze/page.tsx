@@ -50,6 +50,7 @@ export default function AnalyzePage() {
   const [depth, setDepth] = useState<"quick" | "standard" | "deep">("standard");
   const [country, setCountry] = useState("US");
   const [sourceTypes, setSourceTypes] = useState<("web" | "news")[]>(["web"]);
+  const [outputFormat, setOutputFormat] = useState<"pdf" | "json" | "both">("both");
   const [competitors, setCompetitors] = useState(["", "", ""]);
   const [brandVoiceSamples, setBrandVoiceSamples] = useState(["", ""]);
   const [loading, setLoading] = useState(false);
@@ -187,7 +188,7 @@ export default function AnalyzePage() {
             depth,
             country,
             sourceTypes,
-            outputFormat: "both",
+            outputFormat,
             competitors: competitors.filter((c) => c.trim()),
             brandVoiceSamples: brandVoiceSamples.filter((s) => s.trim()),
           },
@@ -436,6 +437,28 @@ export default function AnalyzePage() {
                     <Newspaper className="w-4 h-4" />
                     <span className="text-sm font-medium">News</span>
                   </button>
+                </div>
+              </div>
+
+              {/* Output Format */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Output Format
+                </label>
+                <div className="flex gap-3">
+                  {(["pdf", "json", "both"] as const).map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setOutputFormat(fmt)}
+                      className={`flex-1 p-3 rounded-lg border transition-all text-sm font-medium ${
+                        outputFormat === fmt
+                          ? "border-[#E74C3C] bg-[#E74C3C]/10 text-white"
+                          : "border-white/10 text-gray-500 hover:border-white/20"
+                      }`}
+                    >
+                      {fmt === "pdf" ? "PDF Brief" : fmt === "json" ? "JSON Export" : "Both"}
+                    </button>
+                  ))}
                 </div>
               </div>
 

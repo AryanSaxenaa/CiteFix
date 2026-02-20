@@ -76,10 +76,10 @@ export default function Home() {
               OPEN BETA — FREE ACCESS
             </div>
 
-            <h1 className="text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tight font-serif">
-              Stop <span className="text-gray-600 italic">guessing.</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight font-serif">
+              AEO tools tell you what to <span className="text-gray-600 italic">fix.</span>
               <br />
-              Start <span className="text-[#E74C3C]">fixing.</span>
+              Scoutlytics <span className="text-[#E74C3C]">fixes it.</span>
             </h1>
 
             <p className="text-xl text-gray-400 max-w-lg leading-relaxed font-light">
@@ -571,9 +571,9 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 text-xs text-gray-600">
-          <div>© 2025 Scoutlytics. Built for DeveloperWeek 2026 Hackathon.</div>
-          <div className="text-gray-600">
-            scoutlytics.xyz
+          <div>© 2026 Scoutlytics. Built for DeveloperWeek 2026 Hackathon.</div>
+          <div className="text-gray-500">
+            Powered by <a href="https://you.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">You.com APIs</a> &amp; <a href="https://developers.foxit.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Foxit PDF</a>
           </div>
         </div>
       </footer>
