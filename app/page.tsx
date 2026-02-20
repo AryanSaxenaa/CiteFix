@@ -10,13 +10,13 @@ import {
   Check,
   PenTool,
   Server,
-  Search,
   Cpu,
-  Bot,
   ScanLine,
   UploadCloud,
   History,
   X,
+  FileText,
+  Github,
 } from "lucide-react";
 
 export default function Home() {
@@ -43,32 +43,23 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-            <a href="#" className="hover:text-white transition-colors">
-              Platform
+            <a href="#demo" className="hover:text-white transition-colors">
+              Live Demo
             </a>
             <a href="#" className="hover:text-white transition-colors">
-              Live Data
+              Documentation
             </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Developers
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="#pricing" className="hover:text-white transition-colors">
               Pricing
             </a>
           </div>
 
           <div className="flex items-center gap-2">
             <a
-              href="#"
-              className="text-xs font-medium text-gray-300 hover:text-white px-4 py-2 transition-colors hidden sm:block"
-            >
-              Log in
-            </a>
-            <a
               href="/analyze"
               className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
             >
-              Get Started <ArrowRight className="w-3 h-3" />
+              Start Analyzing <ArrowRight className="w-3 h-3" />
             </a>
           </div>
         </div>
@@ -81,7 +72,7 @@ export default function Home() {
           <div className="space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/5 text-xs text-red-400 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E74C3C] animate-pulse"></span>
-              V2.1 NOW LIVE
+              OPEN BETA — FREE ACCESS
             </div>
 
             <h1 className="text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tight font-serif">
@@ -102,7 +93,7 @@ export default function Home() {
                 href="/analyze"
                 className="bg-[#E74C3C] text-white px-8 py-4 rounded-lg text-sm font-semibold tracking-wide hover:bg-[#c0392b] transition-all hover:translate-y-[-2px] shadow-lg shadow-red-900/20 flex items-center justify-center gap-2"
               >
-                <Zap className="w-4 h-4" /> Run Analysis
+                <Zap className="w-4 h-4" /> Run Analysis — Free
               </a>
               <a
                 href="#demo"
@@ -114,12 +105,12 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-gray-500 font-mono pt-8">
-              <div className="flex -space-x-2">
-                <div className="w-6 h-6 rounded-full bg-gray-800 border border-black"></div>
-                <div className="w-6 h-6 rounded-full bg-gray-700 border border-black"></div>
-                <div className="w-6 h-6 rounded-full bg-gray-600 border border-black"></div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-green-500/20 bg-green-500/5">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="text-green-400">No signup required</span>
               </div>
-              <span>Trusted by 2,000+ growth teams</span>
+              <span className="text-gray-600">·</span>
+              <span>Instant results · 100% free during beta</span>
             </div>
           </div>
 
@@ -196,7 +187,7 @@ export default function Home() {
                           Content Rewrite
                         </div>
                         <div className="text-[10px] text-gray-500">
-                          Optimized for You.com
+                          Optimized for AI citations
                         </div>
                       </div>
                     </div>
@@ -213,10 +204,10 @@ export default function Home() {
                       </div>
                       <div>
                         <div className="text-xs text-white font-medium">
-                          Authority Check
+                          Citation Analysis
                         </div>
                         <div className="text-[10px] text-gray-500">
-                          Perplexity Verified
+                          Powered by You.com
                         </div>
                       </div>
                     </div>
@@ -235,30 +226,24 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Intelligence Sources */}
+        {/* Powered By Section */}
         <section className="py-12 border-y border-white/5 bg-white/[0.01]">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
             <p className="text-sm font-medium text-gray-500 whitespace-nowrap">
-              INTELLIGENCE SOURCES
+              POWERED BY
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-12 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+            <div className="flex flex-wrap items-center justify-center gap-16 opacity-60 hover:opacity-100 transition-all duration-500">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 bg-white rounded-full p-1">
                   <div className="w-full h-full bg-black rounded-full"></div>
                 </div>
                 <span className="font-bold text-white text-lg">You.com</span>
+                <span className="text-xs text-gray-500 ml-1">Search &amp; AI APIs</span>
               </div>
               <div className="flex items-center gap-2">
-                <Search className="w-5 h-5 text-white" />
-                <span className="font-bold text-white text-lg">Google SGE</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-white" />
-                <span className="font-bold text-white text-lg">Perplexity</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-white" />
-                <span className="font-bold text-white text-lg">Bing Chat</span>
+                <FileText className="w-5 h-5 text-white" />
+                <span className="font-bold text-white text-lg">Foxit</span>
+                <span className="text-xs text-gray-500 ml-1">PDF Generation</span>
               </div>
             </div>
           </div>
@@ -269,11 +254,11 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
             <div>
               <h2 className="text-4xl md:text-5xl mb-4 font-serif">
-                The Automated Workflow
+                How It Works
               </h2>
               <p className="text-gray-400 max-w-md">
-                Replace your manual audit process with an intelligent engine
-                that runs 24/7.
+                Enter a domain and topic. Get a complete implementation brief
+                with deployment-ready assets in under two minutes.
               </p>
             </div>
             <a
@@ -294,11 +279,12 @@ export default function Home() {
                 <ScanLine className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-medium mb-3 text-white">
-                Deep Analysis
+                Live Citation Analysis
               </h3>
               <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                We scan your domain against 50+ AEO ranking factors, identifying
-                exactly why competitors appear in AI answers instead of you.
+                We query You.com&apos;s live search APIs to discover which pages AI
+                engines are actually citing for your topic — then extract what
+                makes them citable.
               </p>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 w-1/3"></div>
@@ -314,11 +300,12 @@ export default function Home() {
                 <Cpu className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-medium mb-3 text-white">
-                Asset Generation
+                Gap Detection &amp; Asset Generation
               </h3>
               <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                Our engine automatically generates the JSON-LD schema, HTML
-                structure, and content rewrites needed to capture the citation.
+                AI identifies what your site is missing — FAQ schema, structured
+                content, entity markup — and generates the exact code and copy
+                to close each gap.
               </p>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-[#E74C3C] w-2/3"></div>
@@ -334,11 +321,12 @@ export default function Home() {
                 <UploadCloud className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-medium mb-3 text-white">
-                Instant Deployment
+                PDF Brief &amp; Handoff
               </h3>
               <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                Push the changes directly to your CMS or hand off the generated
-                brief to your dev team. Zero friction integration.
+                Everything is packaged into a professional implementation brief
+                (PDF via Foxit) — ready to hand off to your dev team or
+                implement yourself.
               </p>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-green-500 w-full"></div>
@@ -406,25 +394,25 @@ export default function Home() {
                     <div className="w-5 h-5 rounded-full bg-[#E74C3C] flex items-center justify-center text-xs">
                       <Check className="w-3 h-3 text-white" />
                     </div>
-                    <span>Automated API Analysis</span>
+                    <span>Live You.com API analysis</span>
                   </div>
                   <div className="flex items-center gap-3 text-white">
                     <div className="w-5 h-5 rounded-full bg-[#E74C3C] flex items-center justify-center text-xs">
                       <Check className="w-3 h-3 text-white" />
                     </div>
-                    <span>Entity &amp; Semantic Focus</span>
+                    <span>Entity &amp; semantic pattern detection</span>
                   </div>
                   <div className="flex items-center gap-3 text-white">
                     <div className="w-5 h-5 rounded-full bg-[#E74C3C] flex items-center justify-center text-xs">
                       <Check className="w-3 h-3 text-white" />
                     </div>
-                    <span>Seconds to generated code</span>
+                    <span>Generated code in seconds</span>
                   </div>
                   <div className="flex items-center gap-3 text-white">
                     <div className="w-5 h-5 rounded-full bg-[#E74C3C] flex items-center justify-center text-xs">
                       <Check className="w-3 h-3 text-white" />
                     </div>
-                    <span>Data-backed Reverse Engineering</span>
+                    <span>PDF brief via Foxit — ready to ship</span>
                   </div>
                 </div>
               </div>
@@ -436,11 +424,14 @@ export default function Home() {
         <section id="demo" className="py-24 max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-[#E74C3C] font-mono text-xs uppercase tracking-widest">
-              Live Simulation
+              See It In Action
             </span>
             <h2 className="text-4xl mt-2 font-serif">
               Try the engine right now
             </h2>
+            <p className="text-gray-400 mt-4 max-w-lg mx-auto">
+              Enter any domain below and watch Scoutlytics analyze its AEO presence in real time. No signup needed.
+            </p>
           </div>
 
           <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-[#0c0c0c]">
@@ -451,7 +442,7 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
               </div>
               <div className="text-xs text-gray-500 font-mono">
-                scoutlytics-cli — v2.1.0
+                scoutlytics — open beta
               </div>
               <div className="w-10"></div>
             </div>
@@ -464,11 +455,7 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-6">
                 <span className="text-[#E74C3C]">➜</span>
                 <span className="text-blue-400">~</span>
-                <input
-                  type="text"
-                  placeholder="yoursite.com"
-                  className="bg-transparent border-none outline-none text-white w-full placeholder-gray-700 focus:ring-0"
-                />
+                <span className="text-gray-300">scoutlytics analyze yoursite.com --topic &quot;your topic&quot;</span>
               </div>
 
               <div className="space-y-2">
@@ -480,36 +467,100 @@ export default function Home() {
                 <div className="flex gap-2">
                   <span className="text-green-500">✔</span>
                   <span className="text-gray-300">
-                    Querying Perplexity API...
+                    Querying You.com Search API...
                   </span>
                   <span className="text-gray-600">Done (0.4s)</span>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-green-500">✔</span>
                   <span className="text-gray-300">
-                    Analyzing Competitor Schema...
+                    Extracting citation patterns...
                   </span>
                   <span className="text-gray-600">Done (0.8s)</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-green-500">✔</span>
+                  <span className="text-gray-300">
+                    Generating implementation assets...
+                  </span>
+                  <span className="text-gray-600">Done (1.2s)</span>
                 </div>
                 <br />
                 <div className="p-4 border border-white/10 bg-white/5 rounded">
                   <div className="text-[#E74C3C] font-bold mb-2">
-                    CRITICAL GAP FOUND
+                    3 GAPS FOUND · 3 ASSETS GENERATED
                   </div>
                   <div className="text-gray-400">
                     Your site is missing{" "}
-                    <span className="text-white">FAQPage Schema</span> which is
-                    present on 3/3 top cited competitors.
+                    <span className="text-white">FAQPage Schema</span>,{" "}
+                    <span className="text-white">structured content sections</span>, and{" "}
+                    <span className="text-white">entity markup</span> — all present
+                    on top-cited competitors.
                   </div>
-                  <button className="mt-4 bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors">
-                    Generate Fix Code
-                  </button>
+                  <a href="/analyze" className="mt-4 inline-block bg-[#E74C3C] hover:bg-red-600 text-white px-4 py-2 rounded text-xs transition-colors">
+                    Run Your Own Analysis →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="py-24 max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-[#E74C3C] font-mono text-xs uppercase tracking-widest">
+              Pricing
+            </span>
+            <h2 className="text-4xl mt-2 font-serif">
+              Free while in beta
+            </h2>
+            <p className="text-gray-400 mt-4 max-w-lg mx-auto">
+              Scoutlytics is completely free during our open beta. No credit card,
+              no signup, no limits. Paid plans will launch after beta.
+            </p>
+          </div>
+
+          <div className="max-w-sm mx-auto rounded-2xl bg-[#0F0F0F] border border-[#E74C3C]/30 p-8 relative overflow-hidden shadow-2xl shadow-red-900/10">
+            <div className="absolute top-0 left-0 w-full h-1 bg-[#E74C3C]"></div>
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 text-xs text-green-400 font-mono mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                AVAILABLE NOW
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-white mb-2">Open Beta</h3>
+              <div className="flex items-baseline justify-center gap-2 mb-2">
+                <span className="text-5xl font-bold text-white">$0</span>
+                <span className="text-gray-500">/forever during beta</span>
+              </div>
+              <p className="text-gray-500 text-sm mb-8">Pricing drops after beta. Early users get perks.</p>
+
+              <div className="text-left space-y-3 mb-8">
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-[#E74C3C] flex-shrink-0" />
+                  <span>Unlimited analyses</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-[#E74C3C] flex-shrink-0" />
+                  <span>Full PDF implementation briefs</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-[#E74C3C] flex-shrink-0" />
+                  <span>JSON-LD schema generation</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-[#E74C3C] flex-shrink-0" />
+                  <span>Content rewrite suggestions</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Check className="w-4 h-4 text-[#E74C3C] flex-shrink-0" />
+                  <span>No signup required</span>
                 </div>
               </div>
 
-              <div className="absolute bottom-4 left-4 text-xs text-gray-600 animate-pulse">
-                Waiting for input... <span className="cursor-blink">|</span>
-              </div>
+              <a href="/analyze" className="block w-full bg-[#E74C3C] text-white py-3 rounded-lg text-sm font-semibold hover:bg-[#c0392b] transition-colors">
+                Start Analyzing — It&apos;s Free
+              </a>
             </div>
           </div>
         </section>
@@ -519,28 +570,23 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#E74C3C]/10 to-transparent pointer-events-none"></div>
           <div className="max-w-4xl mx-auto text-center px-6 relative z-10">
             <h2 className="text-5xl md:text-7xl font-serif mb-8 text-white">
-              Dominance is a choice.
+              Your competitors are already cited.
             </h2>
             <p className="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
-              Stop letting competitors answer questions about your brand. Take
-              control of the conversation.
+              AI engines are answering questions about your industry right now.
+              Find out if you&apos;re being mentioned — and fix it if you&apos;re not.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="/analyze" className="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-200 transition-colors shadow-[0_0_40px_rgba(255,255,255,0.3)] inline-block text-center">
-                Get Started Free
-              </a>
-              <button className="w-full sm:w-auto px-8 py-4 rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors text-lg">
-                Talk to Sales
-              </button>
-            </div>
+            <a href="/analyze" className="inline-block bg-white text-black px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-200 transition-colors shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+              Run Free Analysis
+            </a>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#020202] border-t border-white/5 pt-20 pb-10 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-20">
-          <div className="col-span-2 lg:col-span-2">
+      <footer className="bg-[#020202] border-t border-white/5 pt-16 pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+          <div>
             <div className="flex items-center gap-2 mb-6">
               <div className="w-6 h-6 bg-[#E74C3C] flex items-center justify-center rounded-sm">
                 <Sparkles className="text-white w-3 h-3" />
@@ -550,108 +596,66 @@ export default function Home() {
               </span>
             </div>
             <p className="text-gray-500 text-sm max-w-sm">
-              The standard for Answer Engine Optimization. Helping brands secure
-              their citations in the age of AI search.
+              Automated Answer Engine Optimization. Analyze your site&apos;s
+              presence in AI-generated answers and get deployment-ready fixes.
             </p>
           </div>
 
           <div className="flex flex-col gap-4">
             <h4 className="text-white font-medium">Product</h4>
             <a
-              href="#"
+              href="/analyze"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
-              Features
+              Run Analysis
             </a>
             <a
-              href="#"
+              href="#demo"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
-              Integrations
+              Live Demo
             </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              Pricing
-            </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              Changelog
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <h4 className="text-white font-medium">Resources</h4>
             <a
               href="#"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
               Documentation
             </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              API Reference
-            </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              Community
-            </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              Help Center
-            </a>
           </div>
 
           <div className="flex flex-col gap-4">
-            <h4 className="text-white font-medium">Company</h4>
+            <h4 className="text-white font-medium">Built With</h4>
             <a
-              href="#"
+              href="https://you.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
-              About
+              You.com APIs
             </a>
             <a
-              href="#"
+              href="https://developers.foxit.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
             >
-              Careers
+              Foxit PDF Services
             </a>
             <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
+              href="https://github.com/AryanSaxenaa/CiteFix"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors flex items-center gap-1.5"
             >
-              Legal
-            </a>
-            <a
-              href="#"
-              className="text-gray-500 hover:text-[#E74C3C] text-sm transition-colors"
-            >
-              Contact
+              <Github className="w-3.5 h-3.5" /> GitHub
             </a>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5 text-xs text-gray-600">
-          <div>© 2024 Scoutlytics. All rights reserved.</div>
-          <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Cookies
-            </a>
+          <div>© 2025 Scoutlytics. Built for DeveloperWeek 2026 Hackathon.</div>
+          <div className="text-gray-600">
+            scoutlytics.xyz
           </div>
         </div>
       </footer>
